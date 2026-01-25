@@ -1,0 +1,4848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRM文件生成器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        /* ==================== 优化后的CSS变量 ==================== */
+        :root {
+            /* 背景色 - 更柔和的灰调 */
+            --bg-primary: #f2f2f7;
+            --bg-secondary: rgba(255, 255, 255, 0.85);
+            --bg-tertiary: rgba(250, 250, 252, 0.9);
+            --bg-quaternary: rgba(245, 245, 250, 0.95);
+            
+            /* 文字颜色 - 更好的对比度 */
+            --text-primary: #1a1a1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #48484a;
+            
+            /* 强调色 - 现代渐变 */
+            --accent-color: #007aff;
+            --accent-hover: #0056b3;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            --accent-gradient-hover: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+            --accent-soft: rgba(99, 102, 241, 0.12);
+            
+            /* 边框和阴影 */
+            --border-color: rgba(0, 0, 0, 0.06);
+            --border-color-strong: rgba(0, 0, 0, 0.12);
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+            --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+            
+            /* 圆角 */
+            --radius-xs: 6px;
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 9999px;
+            
+            /* 过渡动画 */
+            --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            
+            /* 毛玻璃效果 - 优化性能：减少blur值 */
+            --blur-sm: blur(6px);
+            --blur-md: blur(10px);
+            --blur-lg: blur(12px);
+            
+            /* 间距系统 */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+        }
+
+        [data-theme="dark"] {
+            /* 深色模式背景 */
+            --bg-primary: #0d0d0f;
+            --bg-secondary: rgba(28, 28, 32, 0.85);
+            --bg-tertiary: rgba(38, 38, 44, 0.9);
+            --bg-quaternary: rgba(48, 48, 54, 0.95);
+            
+            /* 深色模式文字 */
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --text-tertiary: #c7c7cc;
+            
+            /* 深色模式强调色 */
+            --accent-color: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-soft: rgba(99, 102, 241, 0.2);
+            
+            /* 深色模式边框和阴影 */
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-color-strong: rgba(255, 255, 255, 0.15);
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25);
+            --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.4);
+        }
+
+        /* ==================== 基础样式重置 ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: var(--transition);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* 背景装饰 - 优化：移除动画，使用静态背景减少GPU压力 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 60%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+            /* 移除耗性能的持续动画 */
+        }
+
+        [data-theme="dark"] body::before {
+            background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 60%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: var(--space-2xl) var(--space-lg);
+        }
+
+        /* ==================== Header 头部样式 ==================== */
+        header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+            padding: var(--space-lg) 0;
+        }
+
+        .logo {
+            font-size: 56px;
+            margin-bottom: var(--space-md);
+            display: inline-block;
+            /* 优化：移除持续动画，仅保留静态样式 */
+            filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+            transform: translateZ(0); /* 触发GPU加速 */
+        }
+
+        h1 {
+            font-size: 44px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--space-sm);
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            /* 优化：移除渐变动画，使用静态渐变 */
+            text-shadow: 0 2px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .subtitle {
+            font-size: 17px;
+            color: var(--text-secondary);
+            font-weight: 450;
+            letter-spacing: 0.01em;
+        }
+
+        /* ==================== 主题切换按钮 ==================== */
+        .theme-toggle {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-full);
+            background: var(--bg-secondary);
+            backdrop-filter: var(--blur-sm); /* 优化：使用更小的blur */
+            -webkit-backdrop-filter: var(--blur-sm);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* 优化：简化transition */
+            z-index: 1000;
+            /* 优化：移除will-change */
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg) translateZ(0);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            border-color: var(--accent-color);
+            will-change: transform;
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* ==================== 卡片样式（毛玻璃效果） ==================== */
+        .card {
+            background: var(--bg-secondary);
+            backdrop-filter: var(--blur-md); /* 优化：降低blur强度 */
+            -webkit-backdrop-filter: var(--blur-md);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            /* 优化：移除 will-change，仅在hover时添加 */
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 卡片顶部渐变装饰线 */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-4px) translateZ(0); /* 优化：添加translateZ触发GPU加速 */
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-color-strong);
+            will-change: transform; /* 优化：仅在hover时添加will-change */
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: var(--shadow-sm), 0 4px 12px rgba(99, 102, 241, 0.25);
+            transition: var(--transition);
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.08) rotate(-3deg);
+            box-shadow: var(--shadow-md), 0 6px 20px rgba(99, 102, 241, 0.35);
+        }
+
+        .card-title {
+            font-size: 21px;
+            font-weight: 650;
+            letter-spacing: -0.015em;
+            color: var(--text-primary);
+        }
+
+        /* ==================== 拖拽区域 ==================== */
+        .drop-zone {
+            border: 2px dashed var(--border-color-strong);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl) var(--space-xl);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-tertiary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent-color);
+            border-style: solid;
+            background: var(--accent-soft);
+            transform: scale(1.01);
+        }
+
+        .drop-zone.dragover::before {
+            opacity: 0.05;
+        }
+
+        .drop-zone-icon {
+            font-size: 52px;
+            margin-bottom: var(--space-md);
+            display: inline-block;
+            transition: transform 0.3s ease; /* 优化：简化transition */
+        }
+
+        .drop-zone:hover .drop-zone-icon {
+            transform: translateY(-6px) scale(1.05) translateZ(0); /* 优化：减小变化幅度 */
+        }
+
+        .drop-zone-text {
+            font-size: 17px;
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-sm);
+            font-weight: 500;
+        }
+
+        .drop-zone-hint {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* ==================== 文件信息 ==================== */
+        .file-info {
+            display: none;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            margin-top: var(--space-md);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .file-info.visible {
+            display: flex;
+            animation: slideInUp 0.3s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-info-icon {
+            font-size: 36px;
+        }
+
+        .file-info-details {
+            flex: 1;
+        }
+
+        .file-info-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+            font-size: 15px;
+        }
+
+        .file-info-size {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .file-info-remove {
+            width: 34px;
+            height: 34px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 59, 48, 0.1);
+            border: none;
+            color: #ff3b30;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .file-info-remove:hover {
+            background: rgba(255, 59, 48, 0.2);
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .file-info-remove:active {
+            transform: scale(0.95);
+        }
+
+        /* ==================== 输入框样式 ==================== */
+        .input-group {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 550;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px 18px;
+            font-size: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; /* 优化：指定具体属性 */
+            font-family: inherit;
+            /* 优化：移除will-change */
+        }
+
+        .text-input:hover {
+            border-color: var(--border-color-strong);
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-sm);
+            background: var(--bg-secondary);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        /* ==================== 按钮样式 ==================== */
+        .btn {
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* 优化：指定具体属性 */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            border: none;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            /* 优化：移除will-change，仅在hover时使用 */
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: var(--shadow-sm), 0 4px 14px rgba(99, 102, 241, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            /* 优化：移除background-size动画 */
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) translateZ(0);
+            box-shadow: var(--shadow-md), 0 8px 25px rgba(99, 102, 241, 0.4);
+            /* 优化：移除background-position变化 */
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm), 0 4px 14px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-color-strong);
+            /* 优化：移除backdrop-filter，使用纯色背景 */
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-quaternary);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        /* ==================== 统计卡片 ==================== */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .stat-item {
+            background: var(--bg-tertiary);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-item:hover::before {
+            opacity: 0.05;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: var(--space-xs);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ==================== 预览列表 ==================== */
+        .preview-container {
+            max-height: 420px;
+            overflow-y: auto;
+            border-radius: var(--radius-lg);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-list {
+            list-style: none;
+        }
+
+        .preview-item {
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            transition: var(--transition);
+        }
+
+        .preview-item:last-child {
+            border-bottom: none;
+        }
+
+        .preview-item:hover {
+            background: var(--accent-soft);
+        }
+
+        .preview-item-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .preview-item-path {
+            flex: 1;
+            font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 13px;
+            color: var(--text-tertiary);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .preview-item-url {
+            font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 12px;
+            color: var(--accent-color);
+            word-break: break-all;
+            margin-top: var(--space-xs);
+            line-height: 1.5;
+        }
+
+        /* ==================== 目录树视图 ==================== */
+        .tree-container {
+            max-height: 320px;
+            overflow-y: auto;
+            border-radius: var(--radius-lg);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: var(--space-lg);
+            font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .tree-node {
+            padding: 3px 0;
+            padding-left: 22px;
+            position: relative;
+        }
+
+        .tree-node::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 1.5px;
+            background: var(--border-color-strong);
+        }
+
+        .tree-node:last-child::before {
+            bottom: 50%;
+        }
+
+        .tree-node::after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 13px;
+            width: 12px;
+            height: 1.5px;
+            background: var(--border-color-strong);
+        }
+
+        .tree-folder {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .tree-file {
+            color: var(--text-tertiary);
+        }
+
+        .tree-folder::before {
+            content: '📁 ';
+        }
+
+        .tree-file::before {
+            content: '🎬 ';
+        }
+
+        /* ==================== 空状态 ==================== */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-2xl) var(--space-lg);
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 72px;
+            margin-bottom: var(--space-lg);
+            opacity: 0.4;
+            filter: grayscale(0.3);
+        }
+
+        .empty-state-text {
+            font-size: 17px;
+            font-weight: 450;
+        }
+
+        /* ==================== 进度条 ==================== */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-top: var(--space-md);
+            display: none;
+        }
+
+        .progress-bar.visible {
+            display: block;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-full);
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        /* 优化：移除进度条流光动画，仅使用静态渐变 */
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+            /* 移除持续动画 */
+        }
+
+        /* ==================== 滚动条样式 ==================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color-strong);
+            border-radius: var(--radius-full);
+            transition: var(--transition);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* ==================== 响应式设计 ==================== */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-lg) var(--space-md);
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 15px;
+            }
+
+            .logo {
+                font-size: 48px;
+            }
+
+            .card {
+                padding: var(--space-lg);
+                border-radius: var(--radius-lg);
+            }
+
+            .card-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 20px;
+            }
+
+            .card-title {
+                font-size: 18px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 16px 24px;
+                min-height: 52px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--space-sm);
+            }
+
+            .stat-item {
+                padding: var(--space-md);
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            .theme-toggle {
+                top: var(--space-md);
+                right: var(--space-md);
+                width: 46px;
+                height: 46px;
+                font-size: 20px;
+            }
+
+            .drop-zone {
+                padding: var(--space-xl) var(--space-md);
+            }
+
+            .drop-zone-icon {
+                font-size: 44px;
+            }
+
+            .drop-zone-text {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+            }
+        }
+
+        /* ==================== 减少动画 - 用户偏好 ==================== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            
+            .card {
+                animation: none !important;
+                opacity: 1 !important;
+            }
+            
+            .toast {
+                animation: none !important;
+            }
+            
+            .tag-item {
+                animation: none !important;
+            }
+            
+            .spinner {
+                animation: spin 0.8s linear infinite !important; /* 保留必要的加载动画 */
+            }
+        }
+
+        /* ==================== 移动端动画优化 ==================== */
+        @media (max-width: 768px) {
+            /* 移动端禁用backdrop-filter以提升性能 */
+            .card,
+            .toast,
+            .theme-toggle,
+            .webdav-browser,
+            .webdav-modal-overlay {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+            
+            /* 移动端减少hover动画 */
+            .card:hover {
+                transform: none;
+            }
+            
+            .card:hover .card-icon {
+                transform: none;
+            }
+            
+            /* 移动端简化过渡 */
+            .btn:hover,
+            .tag-item:hover,
+            .stat-item:hover {
+                transform: none;
+            }
+        }
+
+        /* ==================== 动画效果（性能优化版） ==================== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.02s; }
+        .card:nth-child(2) { animation-delay: 0.04s; }
+        .card:nth-child(3) { animation-delay: 0.06s; }
+        .card:nth-child(4) { animation-delay: 0.08s; }
+        .card:nth-child(5) { animation-delay: 0.1s; }
+        .card:nth-child(6) { animation-delay: 0.12s; }
+
+        /* ==================== Toast 通知 ==================== */
+        .toast-container {
+            position: fixed;
+            bottom: var(--space-lg);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+        }
+
+        .toast {
+            background: var(--bg-secondary);
+            backdrop-filter: var(--blur-sm); /* 优化：减少blur值 */
+            -webkit-backdrop-filter: var(--blur-sm);
+            color: var(--text-primary);
+            padding: 14px 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: toastSlideUp 0.3s ease-out; /* 优化：简化动画 */
+            font-weight: 500;
+        }
+
+        /* 优化：简化toast动画 */
+        @keyframes toastSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast-success {
+            border-left: 4px solid #34c759;
+            background: linear-gradient(90deg, rgba(52, 199, 89, 0.1) 0%, var(--bg-secondary) 30%);
+        }
+        .toast-error {
+            border-left: 4px solid #ff3b30;
+            background: linear-gradient(90deg, rgba(255, 59, 48, 0.1) 0%, var(--bg-secondary) 30%);
+        }
+        .toast-info {
+            border-left: 4px solid #007aff;
+            background: linear-gradient(90deg, rgba(0, 122, 255, 0.1) 0%, var(--bg-secondary) 30%);
+        }
+
+        /* ==================== Toggle 开关（iOS风格） ==================== */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .toggle-group:hover {
+            background: var(--bg-quaternary);
+            border-color: var(--border-color-strong);
+        }
+
+        .toggle-label {
+            font-size: 15px;
+            font-weight: 550;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .toggle-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #d8d8dc 0%, #e8e8ed 100%);
+            border-radius: var(--radius-full);
+            transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .toggle-slider {
+            background: linear-gradient(180deg, #3a3a3e 0%, #48484c 100%);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-slider::before {
+            position: absolute;
+            content: "";
+            height: 28px;
+            width: 28px;
+            left: 2px;
+            bottom: 2px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
+            border-radius: 50%;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(180deg, #30d158 0%, #34c759 100%);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 12px rgba(52, 199, 89, 0.4);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        .toggle-switch input:focus + .toggle-slider {
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(52, 199, 89, 0.25);
+        }
+
+        .toggle-switch:hover .toggle-slider::before {
+            transform: scale(1.02);
+        }
+
+        .toggle-switch input:checked:hover + .toggle-slider::before {
+            transform: translateX(20px) scale(1.02);
+        }
+
+        .toggle-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+            min-width: 40px;
+            text-align: right;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .toggle-status.active {
+            color: #34c759;
+        }
+
+        /* ==================== 标签输入（文件后缀名） ==================== */
+        .tag-input-container {
+            margin-top: var(--space-md);
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            min-height: 64px;
+            margin-bottom: var(--space-md);
+            border: 1px solid var(--border-color);
+            align-content: flex-start;
+        }
+
+        .tag-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: var(--accent-gradient);
+            color: white;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            /* 优化：简化入场动画，仅使用opacity和scale */
+            animation: tagFadeIn 0.2s ease-out;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .tag-item:hover {
+            transform: translateY(-1px) translateZ(0);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* 优化：简化标签入场动画 */
+        @keyframes tagFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .tag-item-remove {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            transition: var(--transition);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .tag-item-remove:hover {
+            background: rgba(255, 255, 255, 0.45);
+            transform: rotate(90deg);
+        }
+
+        .tag-input-row {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .tag-input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .tag-input:hover {
+            border-color: var(--border-color-strong);
+        }
+
+        .tag-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+            background: var(--bg-secondary);
+        }
+
+        .tag-btn {
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .tag-btn-add {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .tag-btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .tag-btn-add:active {
+            transform: translateY(0);
+        }
+
+        .tag-btn-reset {
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+            border: 1.5px solid var(--border-color-strong);
+        }
+
+        .tag-btn-reset:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-secondary);
+            transform: translateY(-1px);
+        }
+
+        .tag-hint {
+            margin-top: var(--space-sm);
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ==================== WebDAV 折叠面板 ==================== */
+        .collapsible-panel {
+            margin-top: var(--space-lg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            transition: var(--transition);
+        }
+
+        .collapsible-panel:hover {
+            border-color: var(--border-color-strong);
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .collapsible-header:hover {
+            background: var(--bg-quaternary);
+        }
+
+        .collapsible-icon {
+            font-size: 18px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-secondary);
+        }
+
+        .collapsible-panel.expanded .collapsible-icon {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-title {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 550;
+            color: var(--text-primary);
+        }
+
+        .collapsible-status {
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: var(--radius-full);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .collapsible-status.connected {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+        }
+
+        .collapsible-status.error {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .collapsible-panel.expanded .collapsible-content {
+            max-height: 800px;
+        }
+
+        .collapsible-body {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .webdav-form-group {
+            margin-bottom: var(--space-md);
+        }
+
+        .webdav-form-group:last-of-type {
+            margin-bottom: var(--space-lg);
+        }
+
+        .webdav-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 550;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .webdav-input {
+            width: 100%;
+            padding: 13px 16px;
+            font-size: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .webdav-input:hover {
+            border-color: var(--border-color-strong);
+        }
+
+        .webdav-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+            background: var(--bg-secondary);
+        }
+
+        .webdav-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        .webdav-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+        }
+
+        @media (max-width: 768px) {
+            .webdav-row {
+                grid-template-columns: 1fr;
+            }
+
+            /* WebDAV 目录浏览器移动端适配 */
+            .webdav-browser-header {
+                padding: 14px 16px;
+                gap: 10px;
+            }
+
+            .webdav-breadcrumb {
+                font-size: 14px;
+                gap: 4px;
+            }
+
+            .webdav-breadcrumb-item {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .webdav-browser-content {
+                max-height: 400px;
+            }
+
+            .webdav-file-item {
+                padding: 14px 16px;
+                gap: 12px;
+            }
+
+            .webdav-file-icon {
+                font-size: 28px;
+            }
+
+            .webdav-file-name {
+                font-size: 15px;
+            }
+
+            .webdav-file-meta {
+                font-size: 12px;
+            }
+
+            .webdav-browser-loading,
+            .webdav-browser-empty {
+                padding: 50px 20px;
+                font-size: 14px;
+            }
+
+            .webdav-browser-empty-icon {
+                font-size: 48px;
+            }
+            
+            .tag-input-row {
+                flex-direction: column;
+            }
+            
+            .tag-btn {
+                width: 100%;
+            }
+        }
+
+        .webdav-btn-group {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .webdav-btn {
+            flex: 1;
+            padding: 13px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .webdav-btn-connect {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .webdav-btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .webdav-btn-connect:active {
+            transform: translateY(0);
+        }
+
+        .webdav-btn-connect:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .webdav-btn-save {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-color-strong);
+        }
+
+        .webdav-btn-save:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+
+        .webdav-message {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            display: none;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .webdav-message.visible {
+            display: block;
+        }
+
+        .webdav-message.success {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.12) 0%, rgba(52, 199, 89, 0.06) 100%);
+            color: #34c759;
+            border: 1px solid rgba(52, 199, 89, 0.25);
+        }
+
+        .webdav-message.error {
+            background: linear-gradient(135deg, rgba(255, 59, 48, 0.12) 0%, rgba(255, 59, 48, 0.06) 100%);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.25);
+        }
+
+        .webdav-message.info {
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.12) 0%, rgba(0, 122, 255, 0.06) 100%);
+            color: #007aff;
+            border: 1px solid rgba(0, 122, 255, 0.25);
+        }
+
+        .webdav-cors-hint {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(255, 204, 0, 0.05) 100%);
+            border: 1px solid rgba(255, 204, 0, 0.2);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+
+        .webdav-cors-hint strong {
+            color: #cc9900;
+        }
+
+        [data-theme="dark"] .webdav-cors-hint strong {
+            color: #ffcc00;
+        }
+
+        /* ==================== 记住密码复选框 ==================== */
+        .remember-password-label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .remember-password-label:hover {
+            color: var(--text-primary);
+        }
+
+        .remember-password-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+            border-radius: var(--radius-xs);
+        }
+
+        .remember-password-label span {
+            user-select: none;
+        }
+
+        /* ==================== 加载动画 ==================== */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==================== WebDAV 目录浏览模态框 ==================== */
+        .webdav-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5); /* 优化：增加不透明度替代blur */
+            backdrop-filter: var(--blur-sm); /* 优化：减少blur值 */
+            -webkit-backdrop-filter: var(--blur-sm);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease; /* 优化：指定具体属性 */
+        }
+
+        .webdav-modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .webdav-browser {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0.92);
+            width: min(640px, 90vw);
+            height: min(520px, 82vh);
+            min-width: 400px;
+            min-height: 300px;
+            max-width: 90vw;
+            max-height: 90vh;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            background: var(--bg-secondary);
+            backdrop-filter: var(--blur-sm); /* 优化：减少blur值 */
+            -webkit-backdrop-filter: var(--blur-sm);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease; /* 优化：指定具体属性 */
+            overflow: hidden;
+        }
+
+        .webdav-browser.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .webdav-browser.dragging {
+            transition: none;
+            user-select: none;
+        }
+
+        .webdav-browser.resizing {
+            transition: none;
+            user-select: none;
+        }
+
+        .webdav-browser-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            cursor: move;
+            flex-shrink: 0;
+        }
+
+        .webdav-browser-header:active {
+            cursor: grabbing;
+        }
+
+        .webdav-browser-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-right: auto;
+        }
+
+        .webdav-browser-close {
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 59, 48, 0.1);
+            border: none;
+            color: #ff3b30;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .webdav-browser-close:hover {
+            background: rgba(255, 59, 48, 0.2);
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* ==================== 面包屑导航 ==================== */
+        .webdav-breadcrumb-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            flex-shrink: 0;
+            overflow-x: auto;
+        }
+
+        .webdav-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            flex-wrap: nowrap;
+            font-size: 14px;
+            min-width: 0;
+        }
+
+        .webdav-breadcrumb-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .webdav-breadcrumb-item:hover {
+            background: var(--accent-soft);
+            color: var(--accent-color);
+        }
+
+        .webdav-breadcrumb-item.active {
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: default;
+            background: var(--bg-quaternary);
+        }
+
+        .webdav-breadcrumb-item.active:hover {
+            background: var(--bg-quaternary);
+            color: var(--text-primary);
+        }
+
+        .webdav-breadcrumb-separator {
+            color: var(--text-secondary);
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .webdav-browser-content {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            min-height: 0;
+            background: var(--bg-secondary);
+        }
+
+        /* 模态框缩放手柄 */
+        .webdav-resize-handle {
+            position: absolute;
+            z-index: 10;
+        }
+
+        .webdav-resize-handle-n {
+            top: 0;
+            left: 10px;
+            right: 10px;
+            height: 6px;
+            cursor: n-resize;
+        }
+
+        .webdav-resize-handle-s {
+            bottom: 0;
+            left: 10px;
+            right: 10px;
+            height: 6px;
+            cursor: s-resize;
+        }
+
+        .webdav-resize-handle-e {
+            right: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 6px;
+            cursor: e-resize;
+        }
+
+        .webdav-resize-handle-w {
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 6px;
+            cursor: w-resize;
+        }
+
+        .webdav-resize-handle-nw {
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            cursor: nw-resize;
+        }
+
+        .webdav-resize-handle-ne {
+            top: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            cursor: ne-resize;
+        }
+
+        .webdav-resize-handle-sw {
+            bottom: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            cursor: sw-resize;
+        }
+
+        .webdav-resize-handle-se {
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            cursor: se-resize;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .webdav-browser {
+                width: 95vw;
+                height: 85vh;
+                min-width: unset;
+                min-height: unset;
+                border-radius: var(--radius-md);
+            }
+
+            .webdav-browser-header {
+                padding: 12px 16px;
+            }
+
+            .webdav-breadcrumb-bar {
+                padding: 10px 16px;
+            }
+
+            .webdav-resize-handle {
+                display: none;
+            }
+        }
+
+        /* ==================== 加载和空状态 ==================== */
+        .webdav-browser-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-2xl) var(--space-lg);
+            color: var(--text-secondary);
+            gap: var(--space-md);
+            font-size: 15px;
+        }
+
+        .webdav-browser-loading .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-color);
+        }
+
+        .webdav-browser-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-2xl) var(--space-lg);
+            color: var(--text-secondary);
+            gap: var(--space-md);
+            font-size: 15px;
+        }
+
+        .webdav-browser-empty-icon {
+            font-size: 56px;
+            opacity: 0.4;
+        }
+
+        /* ==================== 文件列表 ==================== */
+        .webdav-file-list {
+            list-style: none;
+        }
+
+        .webdav-file-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .webdav-file-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .webdav-file-item:last-child {
+            border-bottom: none;
+        }
+
+        .webdav-file-item:hover {
+            background: var(--accent-soft);
+        }
+
+        .webdav-file-item:hover::before {
+            opacity: 1;
+        }
+
+        .webdav-file-item.selected {
+            background: var(--accent-soft);
+        }
+
+        .webdav-file-item.selected::before {
+            opacity: 1;
+        }
+
+        .webdav-file-icon {
+            font-size: 30px;
+            flex-shrink: 0;
+        }
+
+        .webdav-file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .webdav-file-name {
+            font-size: 15px;
+            font-weight: 550;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+
+        .webdav-file-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        .webdav-file-arrow {
+            color: var(--text-secondary);
+            font-size: 20px;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .webdav-file-item:hover .webdav-file-arrow {
+            color: var(--accent-color);
+            transform: translateX(3px);
+        }
+
+        .webdav-btn-browse {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-color-strong);
+            font-weight: 600;
+        }
+
+        .webdav-btn-browse:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+
+        .webdav-file-path-row {
+            display: flex;
+            gap: var(--space-sm);
+            align-items: flex-end;
+        }
+
+        .webdav-file-path-row .webdav-form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .webdav-file-path-row .webdav-btn-browse {
+            height: 45px;
+            padding: 0 var(--space-md);
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        /* ==================== 广告关键词过滤标签样式 ==================== */
+        .ad-keyword-tag-list .tag-item {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        .ad-keyword-tag-list .tag-item:hover {
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        /* ==================== 增量更新统计样式 ==================== */
+        .incremental-stats {
+            margin-bottom: var(--space-lg);
+            padding: var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .incremental-stats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+        }
+
+        .incremental-stats-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .incremental-stats-clear {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .incremental-stats-clear:hover {
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        .incremental-stats-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+        }
+
+        .incremental-stat-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+        }
+
+        .incremental-stat-icon {
+            font-size: 20px;
+        }
+
+        .incremental-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .incremental-stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .incremental-stat-new {
+            border-left: 3px solid #34c759;
+        }
+
+        .incremental-stat-new .incremental-stat-value {
+            color: #34c759;
+        }
+
+        .incremental-stat-deleted {
+            border-left: 3px solid #ff3b30;
+        }
+
+        .incremental-stat-deleted .incremental-stat-value {
+            color: #ff3b30;
+        }
+
+        .incremental-stat-unchanged {
+            border-left: 3px solid #8e8e93;
+        }
+
+        .incremental-stat-unchanged .incremental-stat-value {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .incremental-stats-items {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ==================== 目录结构预览样式 ==================== */
+        .directory-preview {
+            margin-top: var(--space-lg);
+        }
+
+        .directory-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+
+        .directory-preview-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .directory-preview-actions {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .directory-preview-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .directory-preview-btn:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .directory-tree-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: var(--radius-lg);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: var(--space-md);
+        }
+
+        .directory-preview-footer {
+            display: flex;
+            gap: var(--space-lg);
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        /* ==================== 树形节点样式 ==================== */
+        .tree-item {
+            user-select: none;
+        }
+
+        .tree-item-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tree-item-header:hover {
+            background: var(--accent-soft);
+        }
+
+        .tree-item-toggle {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .tree-item-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tree-item-toggle.hidden {
+            visibility: hidden;
+        }
+
+        .tree-item-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .tree-item-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .tree-item-name {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tree-item-name.folder {
+            font-weight: 550;
+            color: var(--accent-color);
+        }
+
+        .tree-item-name.excluded {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .tree-item-count {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-quaternary);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            flex-shrink: 0;
+        }
+
+        .tree-item-status {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: var(--radius-full);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .tree-item-status.new {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+        }
+
+        .tree-item-status.deleted {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+        }
+
+        .tree-item-status.filtered {
+            background: rgba(255, 149, 0, 0.15);
+            color: #ff9500;
+        }
+
+        .tree-item-children {
+            margin-left: 24px;
+            display: none;
+        }
+
+        .tree-item-children.expanded {
+            display: block;
+        }
+
+        /* ==================== 下载按钮组样式 ==================== */
+        .download-btn-group {
+            flex-wrap: wrap;
+        }
+
+        .btn-badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .btn-new-only {
+            background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+            box-shadow: var(--shadow-sm), 0 4px 14px rgba(52, 199, 89, 0.3);
+        }
+
+        .btn-new-only:hover {
+            box-shadow: var(--shadow-md), 0 8px 25px rgba(52, 199, 89, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .directory-preview-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .tree-item-children {
+                margin-left: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">
+        <span id="themeIcon">🌙</span>
+    </button>
+
+    <div class="container">
+        <header>
+            <div class="logo">📺</div>
+            <h1>STRM 文件生成器</h1>
+            <p class="subtitle">可视化URL拼接与STRM文件批量生成工具</p>
+        </header>
+
+        <!-- 文件导入模块 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">📂</div>
+                <h2 class="card-title">导入目录树文件</h2>
+            </div>
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-icon">📄</div>
+                <p class="drop-zone-text">拖拽文件到此处，或点击选择文件</p>
+                <p class="drop-zone-hint">支持 .txt 格式，自动识别 UTF-16 LE 编码</p>
+            </div>
+            <input type="file" class="file-input" id="fileInput" accept=".txt">
+            <div class="file-info" id="fileInfo">
+                <span class="file-info-icon">📄</span>
+                <div class="file-info-details">
+                    <div class="file-info-name" id="fileName">-</div>
+                    <div class="file-info-size" id="fileSize">-</div>
+                </div>
+                <button class="file-info-remove" onclick="removeFile()" title="移除文件">✕</button>
+            </div>
+
+            <!-- WebDAV 连接面板 -->
+            <div class="collapsible-panel" id="webdavPanel">
+                <div class="collapsible-header" onclick="toggleWebdavPanel()">
+                    <span class="collapsible-icon">▶</span>
+                    <span class="collapsible-title">通过 WebDAV 获取文件</span>
+                    <span class="collapsible-status" id="webdavStatus">未连接</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="collapsible-body">
+                        <div class="webdav-form-group">
+                            <label class="webdav-label">WebDAV 服务器 URL</label>
+                            <input type="text" class="webdav-input" id="webdavUrl" placeholder="例如：https://example.com/dav/">
+                        </div>
+                        <div class="webdav-row">
+                            <div class="webdav-form-group">
+                                <label class="webdav-label">用户名</label>
+                                <input type="text" class="webdav-input" id="webdavUser" placeholder="输入用户名">
+                            </div>
+                            <div class="webdav-form-group">
+                                <label class="webdav-label">密码</label>
+                                <input type="password" class="webdav-input" id="webdavPass" placeholder="输入密码">
+                                <label class="remember-password-label">
+                                    <input type="checkbox" id="rememberPassword">
+                                    <span>记住密码</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="webdav-form-group">
+                            <label class="webdav-label">txt 文件路径</label>
+                            <div class="webdav-file-path-row">
+                                <div class="webdav-form-group">
+                                    <input type="text" class="webdav-input" id="webdavFilePath" placeholder="例如：/media/目录树.txt">
+                                </div>
+                                <button class="webdav-btn webdav-btn-browse" onclick="openWebdavBrowser()">
+                                    📂 浏览
+                                </button>
+                            </div>
+                        </div>
+                        <div class="webdav-btn-group">
+                            <button class="webdav-btn webdav-btn-connect" id="webdavConnectBtn" onclick="fetchFromWebdav()">
+                                <span id="webdavBtnText">连接并获取</span>
+                            </button>
+                            <button class="webdav-btn webdav-btn-save" onclick="saveWebdavConfig()">
+                                💾 保存配置
+                            </button>
+                        </div>
+                        <div class="webdav-message" id="webdavMessage"></div>
+                        <div class="webdav-cors-hint">
+                            <strong>⚠️ 提示：</strong> 由于浏览器安全限制（CORS），WebDAV 服务器需要配置允许跨域访问，或者您可以使用浏览器扩展（如 CORS Unblock）临时绕过此限制。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 文件后缀名过滤模块 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">🏷️</div>
+                <h2 class="card-title">文件后缀名过滤</h2>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">
+                只有匹配以下后缀名的文件才会生成 STRM 文件
+            </p>
+            <div class="tag-input-container">
+                <div class="tag-list" id="extensionTagList">
+                    <!-- 标签将由 JavaScript 动态生成 -->
+                </div>
+                <div class="tag-input-row">
+                    <input type="text" class="tag-input" id="extensionInput" placeholder="输入后缀名（如：iso）" onkeypress="handleExtensionKeypress(event)">
+                    <button class="tag-btn tag-btn-add" onclick="addExtension()">添加</button>
+                    <button class="tag-btn tag-btn-reset" onclick="resetExtensions()">重置为默认</button>
+                    </div>
+                    <p class="tag-hint">💡 输入后缀名后按 Enter 或点击"添加"按钮。无需输入点号（.）</p>
+                </div>
+            </div>
+    
+            <!-- 广告关键词过滤模块 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🚫</div>
+                    <h2 class="card-title">广告关键词过滤</h2>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">
+                    文件名或文件夹名包含以下关键词时，将不会生成 STRM 文件（大小写不敏感）
+                </p>
+                <div class="tag-input-container">
+                    <div class="tag-list ad-keyword-tag-list" id="adKeywordTagList">
+                        <!-- 标签将由 JavaScript 动态生成 -->
+                    </div>
+                    <div class="tag-input-row">
+                        <input type="text" class="tag-input" id="adKeywordInput" placeholder="输入广告关键词" onkeypress="handleAdKeywordKeypress(event)">
+                        <button class="tag-btn tag-btn-add" onclick="addAdKeyword()">添加</button>
+                        <button class="tag-btn tag-btn-reset" onclick="resetAdKeywords()">重置为默认</button>
+                    </div>
+                    <p class="tag-hint">💡 输入关键词后按 Enter 或点击"添加"按钮。匹配时不区分大小写</p>
+                </div>
+                <div class="toggle-group" style="margin-top: 16px;">
+                    <div>
+                        <div class="toggle-label">启用广告过滤</div>
+                        <div class="toggle-hint">关闭后将不会过滤任何文件</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="adFilterToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-status active" id="adFilterStatus">开启</span>
+                </div>
+            </div>
+    
+            <!-- URL前缀输入模块 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">🔗</div>
+                <h2 class="card-title">URL 前缀设置</h2>
+            </div>
+            <div class="input-wrapper">
+                <label class="input-label">输入媒体服务器的基础 URL</label>
+                <input type="text" class="text-input" id="urlPrefix" placeholder="例如：http://example.com/media/">
+            </div>
+            <div class="toggle-group">
+                <div>
+                    <div class="toggle-label">URL 编码</div>
+                    <div class="toggle-hint">对路径中的特殊字符进行 encodeURIComponent 编码</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="urlEncodeToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-status active" id="toggleStatus">开启</span>
+            </div>
+        </div>
+
+        <!-- 解析结果模块 -->
+        <div class="card" id="parseResultCard" style="display: none;">
+            <div class="card-header">
+                <div class="card-icon">📊</div>
+                <h2 class="card-title">解析结果</h2>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="statFolders">0</div>
+                    <div class="stat-label">文件夹</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statFiles">0</div>
+                    <div class="stat-label">媒体文件</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statDepth">0</div>
+                    <div class="stat-label">最大层级</div>
+                </div>
+                <div class="stat-item" id="statFilteredContainer" style="display: none;">
+                    <div class="stat-value" id="statFiltered">0</div>
+                    <div class="stat-label">已过滤</div>
+                </div>
+            </div>
+            <!-- 增量更新统计 -->
+            <div class="incremental-stats" id="incrementalStats" style="display: none;">
+                <div class="incremental-stats-header">
+                    <span class="incremental-stats-title">📈 增量对比</span>
+                    <button class="incremental-stats-clear" onclick="clearPreviousFiles()" title="清除历史记录">🗑️ 清除历史</button>
+                </div>
+                <div class="incremental-stats-items">
+                    <div class="incremental-stat-item incremental-stat-new">
+                        <span class="incremental-stat-icon">➕</span>
+                        <span class="incremental-stat-value" id="statNewFiles">0</span>
+                        <span class="incremental-stat-label">新增文件</span>
+                    </div>
+                    <div class="incremental-stat-item incremental-stat-deleted">
+                        <span class="incremental-stat-icon">➖</span>
+                        <span class="incremental-stat-value" id="statDeletedFiles">0</span>
+                        <span class="incremental-stat-label">删除文件</span>
+                    </div>
+                    <div class="incremental-stat-item incremental-stat-unchanged">
+                        <span class="incremental-stat-icon">⏸️</span>
+                        <span class="incremental-stat-value" id="statUnchangedFiles">0</span>
+                        <span class="incremental-stat-label">未变化</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 目录结构预览 -->
+            <div class="directory-preview" id="directoryPreview">
+                <div class="directory-preview-header">
+                    <span class="directory-preview-title">📁 目录结构预览</span>
+                    <div class="directory-preview-actions">
+                        <button class="directory-preview-btn" onclick="expandAllTree()" title="展开全部">📂 展开</button>
+                        <button class="directory-preview-btn" onclick="collapseAllTree()" title="折叠全部">📁 折叠</button>
+                        <button class="directory-preview-btn" onclick="selectAllItems()" title="全选">☑️ 全选</button>
+                        <button class="directory-preview-btn" onclick="deselectAllItems()" title="取消全选">☐ 取消</button>
+                    </div>
+                </div>
+                <div class="directory-tree-container" id="directoryTreeContainer">
+                    <!-- 目录树将由 JavaScript 动态生成 -->
+                </div>
+                <div class="directory-preview-footer" id="directoryPreviewFooter">
+                    <span>📁 <strong id="selectedFolderCount">0</strong> 个文件夹</span>
+                    <span>🎬 <strong id="selectedFileCount">0</strong> 个文件</span>
+                    <span>📊 共 <strong id="totalSelectedSize">0</strong> 个 STRM 文件将被生成</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- URL预览模块 -->
+        <div class="card" id="previewCard" style="display: none;">
+            <div class="card-header">
+                <div class="card-icon">👁️</div>
+                <h2 class="card-title">URL 预览</h2>
+            </div>
+            <div class="preview-container" id="previewContainer">
+                <ul class="preview-list" id="previewList">
+                    <!-- URL列表 -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- 生成与下载模块 -->
+        <div class="card" id="downloadCard" style="display: none;">
+            <div class="card-header">
+                <div class="card-icon">💾</div>
+                <h2 class="card-title">生成与下载</h2>
+            </div>
+            <div class="btn-group download-btn-group">
+                <button class="btn btn-primary" id="generateBtn" onclick="generateAndDownload('all')">
+                    <span>📦</span>
+                    <span>全部下载</span>
+                    <span class="btn-badge" id="btnBadgeAll">0</span>
+                </button>
+                <button class="btn btn-primary btn-new-only" id="generateNewBtn" onclick="generateAndDownload('new')" style="display: none;">
+                    <span>✨</span>
+                    <span>仅下载新增</span>
+                    <span class="btn-badge" id="btnBadgeNew">0</span>
+                </button>
+                <button class="btn btn-secondary" onclick="copyAllUrls()">
+                    <span>📋</span>
+                    <span>复制所有 URL</span>
+                </button>
+            </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- WebDAV 目录浏览器模态框 -->
+    <div class="webdav-modal-overlay" id="webdavModalOverlay" onclick="handleOverlayClick(event)"></div>
+    <div class="webdav-browser" id="webdavBrowser">
+        <!-- 缩放手柄 -->
+        <div class="webdav-resize-handle webdav-resize-handle-n" data-direction="n"></div>
+        <div class="webdav-resize-handle webdav-resize-handle-s" data-direction="s"></div>
+        <div class="webdav-resize-handle webdav-resize-handle-e" data-direction="e"></div>
+        <div class="webdav-resize-handle webdav-resize-handle-w" data-direction="w"></div>
+        <div class="webdav-resize-handle webdav-resize-handle-nw" data-direction="nw"></div>
+        <div class="webdav-resize-handle webdav-resize-handle-ne" data-direction="ne"></div>
+        <div class="webdav-resize-handle webdav-resize-handle-sw" data-direction="sw"></div>
+        <div class="webdav-resize-handle webdav-resize-handle-se" data-direction="se"></div>
+        
+        <!-- 标题栏（可拖动） -->
+        <div class="webdav-browser-header" id="webdavBrowserHeader">
+            <span class="webdav-browser-title">📁 WebDAV 目录浏览</span>
+            <button class="webdav-browser-close" onclick="closeWebdavBrowser()" title="关闭">✕</button>
+        </div>
+        
+        <!-- 面包屑导航 -->
+        <div class="webdav-breadcrumb-bar">
+            <div class="webdav-breadcrumb" id="webdavBreadcrumb">
+                <span class="webdav-breadcrumb-item active" data-path="/">📁 根目录</span>
+            </div>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="webdav-browser-content" id="webdavBrowserContent">
+            <div class="webdav-browser-loading" id="webdavBrowserLoading">
+                <div class="spinner"></div>
+                <span>正在加载目录...</span>
+            </div>
+            <div class="webdav-browser-empty" id="webdavBrowserEmpty" style="display: none;">
+                <div class="webdav-browser-empty-icon">📭</div>
+                <span>此目录下没有 txt 文件或文件夹</span>
+            </div>
+            <ul class="webdav-file-list" id="webdavFileList" style="display: none;"></ul>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态
+        let parsedData = null;
+        let mediaFiles = [];
+        let filteredFiles = []; // 被广告过滤掉的文件
+        let previousFileSet = new Set(); // 上次生成的文件列表
+        let newFiles = []; // 新增文件
+        let deletedFiles = []; // 删除文件
+        let unchangedFiles = []; // 未变化文件
+        let excludedPaths = new Set(); // 用户手动排除的路径
+        let treeData = null; // 树形结构数据
+
+        // 默认媒体文件扩展名
+        const DEFAULT_EXTENSIONS = [
+            'mp4', 'mkv', 'avi', 'ts', 'm2ts', 'rmvb', 'rm', 'wmv',
+            'flv', 'mov', 'webm', 'm4v', 'mpeg', 'mpg', '3gp', '3g2'
+        ];
+
+        // 当前使用的扩展名列表
+        let currentExtensions = [...DEFAULT_EXTENSIONS];
+
+        // 默认广告关键词
+        const DEFAULT_AD_KEYWORDS = [
+            '@', '广告', '招租', '公众号', '微信', '加群', '福利',
+            'telegram', 't.me', '永久', '更新', '最新地址',
+            '防失联', '资源群', '群号', '订阅', '合集', '频道',
+            '代理', 'VPN', '梯子', '翻墙', '加速器', '网盘',
+            '推广', '优惠', '折扣', '免费领', '限时', '专属'
+        ];
+
+        // 当前使用的广告关键词列表
+        let currentAdKeywords = [...DEFAULT_AD_KEYWORDS];
+
+        // 广告过滤开关状态
+        let adFilterEnabled = true;
+
+        // 主题切换
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // 初始化主题
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('themeIcon').textContent = '☀️';
+            }
+        }
+
+        // Toast 通知
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // 文件大小格式化
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 初始化拖拽区域
+        function initDropZone() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+        }
+
+        // 处理文件
+        async function handleFile(file) {
+            if (!file.name.endsWith('.txt')) {
+                showToast('请选择 .txt 格式的文件', 'error');
+                return;
+            }
+
+            // 显示文件信息
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').classList.add('visible');
+
+            try {
+                const content = await readFileContent(file);
+                parseDirectoryTree(content);
+                showToast('文件解析成功', 'success');
+            } catch (error) {
+                console.error('解析错误:', error);
+                showToast('文件解析失败: ' + error.message, 'error');
+            }
+        }
+
+        // 读取文件内容（支持UTF-16 LE）
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const arrayBuffer = e.target.result;
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    
+                    // 检测 UTF-16 LE BOM (FF FE)
+                    if (uint8Array.length >= 2 && uint8Array[0] === 0xFF && uint8Array[1] === 0xFE) {
+                        // UTF-16 LE 编码
+                        const decoder = new TextDecoder('utf-16le');
+                        resolve(decoder.decode(arrayBuffer));
+                    } else if (uint8Array.length >= 2 && uint8Array[0] === 0xFE && uint8Array[1] === 0xFF) {
+                        // UTF-16 BE 编码
+                        const decoder = new TextDecoder('utf-16be');
+                        resolve(decoder.decode(arrayBuffer));
+                    } else if (uint8Array.length >= 3 && uint8Array[0] === 0xEF && uint8Array[1] === 0xBB && uint8Array[2] === 0xBF) {
+                        // UTF-8 with BOM
+                        const decoder = new TextDecoder('utf-8');
+                        resolve(decoder.decode(arrayBuffer));
+                    } else {
+                        // 默认 UTF-8
+                        const decoder = new TextDecoder('utf-8');
+                        resolve(decoder.decode(arrayBuffer));
+                    }
+                };
+                reader.onerror = () => reject(new Error('文件读取失败'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // 解析目录树
+        function parseDirectoryTree(content) {
+            const lines = content.split(/\r?\n/).filter(line => line.trim());
+            const root = { name: 'root', type: 'folder', children: [] };
+            const stack = [{ node: root, level: -1 }];
+            
+            let folderCount = 0;
+            let fileCount = 0;
+            let maxDepth = 0;
+            mediaFiles = [];
+
+            for (const line of lines) {
+                // 计算层级（竖线数量）
+                const pipeCount = (line.match(/\|/g) || []).length;
+                const level = pipeCount;
+                
+                // 提取名称 - 支持多种格式
+                let name = '';
+                
+                // 格式1: "| |-名称" 或 "|-名称"
+                const match1 = line.match(/\|-\s*(.+)$/);
+                if (match1) {
+                    name = match1[1].trim();
+                }
+                
+                if (!name) continue;
+
+                // 判断是文件还是文件夹
+                const isFile = /\.[a-zA-Z0-9]+$/.test(name);
+                const isMediaFile = isFile && isMediaExtension(name);
+
+                const node = {
+                    name: name,
+                    type: isFile ? 'file' : 'folder',
+                    isMedia: isMediaFile,
+                    children: isFile ? undefined : [],
+                    path: []
+                };
+
+                // 找到父节点
+                while (stack.length > 1 && stack[stack.length - 1].level >= level) {
+                    stack.pop();
+                }
+
+                const parent = stack[stack.length - 1].node;
+                
+                // 构建路径
+                node.path = [...(parent.path || []), name];
+                
+                if (parent.children) {
+                    parent.children.push(node);
+                }
+
+                if (!isFile) {
+                    stack.push({ node, level });
+                    folderCount++;
+                } else if (isMediaFile) {
+                    fileCount++;
+                    mediaFiles.push(node);
+                }
+
+                maxDepth = Math.max(maxDepth, level);
+            }
+
+            parsedData = root;
+
+            // 应用广告过滤
+            filteredFiles = [];
+            let filteredCount = 0;
+            const originalMediaFiles = [...mediaFiles];
+            mediaFiles = [];
+            
+            for (const file of originalMediaFiles) {
+                const pathStr = file.path.join('/');
+                if (containsAdKeyword(pathStr)) {
+                    filteredFiles.push(file);
+                    filteredCount++;
+                    fileCount--;
+                } else {
+                    mediaFiles.push(file);
+                }
+            }
+
+            // 更新统计
+            document.getElementById('statFolders').textContent = folderCount;
+            document.getElementById('statFiles').textContent = fileCount;
+            document.getElementById('statDepth').textContent = maxDepth;
+            
+            // 显示过滤统计
+            const filteredContainer = document.getElementById('statFilteredContainer');
+            if (filteredCount > 0) {
+                filteredContainer.style.display = 'block';
+                document.getElementById('statFiltered').textContent = filteredCount;
+            } else {
+                filteredContainer.style.display = 'none';
+            }
+
+            // 显示结果卡片
+            document.getElementById('parseResultCard').style.display = 'block';
+            
+            // 计算增量变化
+            calculateIncrementalChanges();
+            
+            // 渲染目录树（新版本）
+            renderDirectoryTree();
+
+            // 更新预览
+            updatePreview();
+        }
+
+        // 渲染目录树视图
+        function renderTreeView(node, container = null) {
+            if (!container) {
+                container = document.getElementById('treeView');
+                container.innerHTML = '';
+            }
+
+            if (node.children) {
+                for (const child of node.children) {
+                    const div = document.createElement('div');
+                    div.className = 'tree-node';
+                    
+                    const span = document.createElement('span');
+                    span.className = child.type === 'folder' ? 'tree-folder' : 'tree-file';
+                    span.textContent = child.name;
+                    div.appendChild(span);
+
+                    if (child.children && child.children.length > 0) {
+                        const childContainer = document.createElement('div');
+                        renderTreeView(child, childContainer);
+                        div.appendChild(childContainer);
+                    }
+
+                    container.appendChild(div);
+                }
+            }
+        }
+
+        // 更新URL预览
+        function updatePreview() {
+            const urlPrefix = document.getElementById('urlPrefix').value.trim();
+            const previewList = document.getElementById('previewList');
+            previewList.innerHTML = '';
+
+            if (mediaFiles.length === 0) {
+                document.getElementById('previewCard').style.display = 'none';
+                document.getElementById('downloadCard').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('previewCard').style.display = 'block';
+            document.getElementById('downloadCard').style.display = 'block';
+
+            for (const file of mediaFiles) {
+                const li = document.createElement('li');
+                li.className = 'preview-item';
+                
+                const pathStr = file.path.join('/');
+                const fullUrl = buildUrl(urlPrefix, pathStr);
+
+                li.innerHTML = `
+                    <span class="preview-item-icon">🎬</span>
+                    <div>
+                        <div class="preview-item-path">${escapeHtml(pathStr)}</div>
+                        <div class="preview-item-url">${escapeHtml(fullUrl)}</div>
+                    </div>
+                `;
+                previewList.appendChild(li);
+            }
+        }
+
+        // 构建URL
+        function buildUrl(prefix, path) {
+            // 处理前缀末尾斜杠
+            let base = prefix.replace(/\/+$/, '');
+            
+            // 获取URL编码开关状态
+            const encodeEnabled = document.getElementById('urlEncodeToggle').checked;
+            
+            // 根据开关状态决定是否编码路径
+            let processedPath;
+            if (encodeEnabled) {
+                // 对路径进行编码，但保留斜杠
+                processedPath = path.split('/').map(segment => encodeURIComponent(segment)).join('/');
+            } else {
+                // 不编码，直接使用原始路径
+                processedPath = path;
+            }
+            
+            if (!base) {
+                return processedPath;
+            }
+            
+            return `${base}/${processedPath}`;
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 移除文件
+        function removeFile() {
+            document.getElementById('fileInfo').classList.remove('visible');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('parseResultCard').style.display = 'none';
+            document.getElementById('previewCard').style.display = 'none';
+            document.getElementById('downloadCard').style.display = 'none';
+            parsedData = null;
+            mediaFiles = [];
+        }
+
+        // 生成并下载
+        async function generateAndDownload(mode = 'all') {
+            const urlPrefix = document.getElementById('urlPrefix').value.trim();
+            
+            // 根据模式选择要生成的文件列表
+            let filesToGenerate;
+            if (mode === 'new') {
+                filesToGenerate = newFiles.filter(f => !excludedPaths.has(f.path.join('/')));
+            } else {
+                filesToGenerate = mediaFiles.filter(f => !excludedPaths.has(f.path.join('/')));
+            }
+            
+            if (filesToGenerate.length === 0) {
+                showToast('没有可生成的媒体文件', 'error');
+                return;
+            }
+
+            const btn = mode === 'new' ? document.getElementById('generateNewBtn') : document.getElementById('generateBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+
+            btn.disabled = true;
+            progressBar.classList.add('visible');
+            progressFill.style.width = '0%';
+
+            try {
+                const zip = new JSZip();
+                const total = filesToGenerate.length;
+
+                for (let i = 0; i < total; i++) {
+                    const file = filesToGenerate[i];
+                    const pathStr = file.path.join('/');
+                    const fullUrl = buildUrl(urlPrefix, pathStr);
+                    
+                    // 生成 .strm 文件路径
+                    const strmPath = pathStr.replace(/\.[^.]+$/, '.strm');
+                    
+                    // 添加到 ZIP
+                    zip.file(strmPath, fullUrl);
+                    
+                    // 更新进度
+                    const progress = ((i + 1) / total) * 100;
+                    progressFill.style.width = `${progress}%`;
+                }
+
+                // 生成 ZIP 文件
+                const content = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+
+                // 下载
+                const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const suffix = mode === 'new' ? '_new' : '';
+                saveAs(content, `strm_files_${timestamp}${suffix}.zip`);
+
+                // 保存当前文件列表作为下次对比的基准
+                savePreviousFileList();
+
+                const modeText = mode === 'new' ? '新增' : '';
+                showToast(`成功生成 ${total} 个${modeText} STRM 文件`, 'success');
+            } catch (error) {
+                console.error('生成错误:', error);
+                showToast('生成失败: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                setTimeout(() => {
+                    progressBar.classList.remove('visible');
+                    progressFill.style.width = '0%';
+                }, 1000);
+            }
+        }
+
+        // 复制所有URL
+        function copyAllUrls() {
+            const urlPrefix = document.getElementById('urlPrefix').value.trim();
+            
+            if (mediaFiles.length === 0) {
+                showToast('没有可复制的URL', 'error');
+                return;
+            }
+
+            const urls = mediaFiles.map(file => {
+                const pathStr = file.path.join('/');
+                return buildUrl(urlPrefix, pathStr);
+            }).join('\n');
+
+            navigator.clipboard.writeText(urls).then(() => {
+                showToast('已复制所有URL到剪贴板', 'success');
+            }).catch(() => {
+                showToast('复制失败，请手动复制', 'error');
+            });
+        }
+
+        // URL前缀输入事件 - 自动保存到localStorage
+        document.getElementById('urlPrefix').addEventListener('input', (e) => {
+            // 保存到localStorage
+            localStorage.setItem('strm_urlPrefix', e.target.value);
+            if (parsedData) {
+                updatePreview();
+            }
+        });
+
+        // URL编码开关事件 - 自动保存到localStorage
+        document.getElementById('urlEncodeToggle').addEventListener('change', (e) => {
+            const toggleStatus = document.getElementById('toggleStatus');
+            if (e.target.checked) {
+                toggleStatus.textContent = '开启';
+                toggleStatus.classList.add('active');
+            } else {
+                toggleStatus.textContent = '关闭';
+                toggleStatus.classList.remove('active');
+            }
+            // 保存到localStorage
+            localStorage.setItem('strm_urlEncode', e.target.checked);
+            // 更新预览
+            if (parsedData) {
+                updatePreview();
+            }
+        });
+
+        // ==================== 后缀名管理功能 ====================
+
+        // 检查文件是否是媒体文件
+        function isMediaExtension(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            return currentExtensions.includes(ext);
+        }
+
+        // 渲染后缀名标签列表
+        function renderExtensionTags() {
+            const container = document.getElementById('extensionTagList');
+            container.innerHTML = '';
+            
+            for (const ext of currentExtensions) {
+                const tag = document.createElement('span');
+                tag.className = 'tag-item';
+                tag.innerHTML = `
+                    .${ext}
+                    <button class="tag-item-remove" onclick="removeExtension('${ext}')" title="删除">×</button>
+                `;
+                container.appendChild(tag);
+            }
+        }
+
+        // 添加后缀名
+        function addExtension() {
+            const input = document.getElementById('extensionInput');
+            let ext = input.value.trim().toLowerCase();
+            
+            // 移除开头的点号
+            ext = ext.replace(/^\.+/, '');
+            
+            if (!ext) {
+                showToast('请输入后缀名', 'error');
+                return;
+            }
+            
+            // 验证格式
+            if (!/^[a-zA-Z0-9]+$/.test(ext)) {
+                showToast('后缀名只能包含字母和数字', 'error');
+                return;
+            }
+            
+            if (currentExtensions.includes(ext)) {
+                showToast('该后缀名已存在', 'error');
+                return;
+            }
+            
+            currentExtensions.push(ext);
+            saveExtensionsToStorage();
+            renderExtensionTags();
+            input.value = '';
+            showToast(`已添加后缀名: .${ext}`, 'success');
+            
+            // 如果有已解析的数据，重新解析
+            if (parsedData) {
+                reprocessMediaFiles();
+            }
+        }
+
+        // 删除后缀名
+        function removeExtension(ext) {
+            const index = currentExtensions.indexOf(ext);
+            if (index > -1) {
+                currentExtensions.splice(index, 1);
+                saveExtensionsToStorage();
+                renderExtensionTags();
+                showToast(`已删除后缀名: .${ext}`, 'info');
+                
+                // 如果有已解析的数据，重新解析
+                if (parsedData) {
+                    reprocessMediaFiles();
+                }
+            }
+        }
+
+        // 重置为默认后缀名
+        function resetExtensions() {
+            currentExtensions = [...DEFAULT_EXTENSIONS];
+            saveExtensionsToStorage();
+            renderExtensionTags();
+            showToast('已重置为默认后缀名列表', 'success');
+            
+            // 如果有已解析的数据，重新解析
+            if (parsedData) {
+                reprocessMediaFiles();
+            }
+        }
+
+        // 处理回车键添加后缀名
+        function handleExtensionKeypress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addExtension();
+            }
+        }
+
+        // 保存后缀名到 localStorage
+        function saveExtensionsToStorage() {
+            localStorage.setItem('strmExtensions', JSON.stringify(currentExtensions));
+        }
+
+        // 从 localStorage 加载后缀名
+        function loadExtensionsFromStorage() {
+            const saved = localStorage.getItem('strmExtensions');
+            if (saved) {
+                try {
+                    currentExtensions = JSON.parse(saved);
+                } catch (e) {
+                    currentExtensions = [...DEFAULT_EXTENSIONS];
+                }
+            }
+        }
+
+        // 重新处理媒体文件（当后缀名列表或广告关键词变化时）
+        function reprocessMediaFiles() {
+            if (!parsedData) return;
+            
+            mediaFiles = [];
+            filteredFiles = [];
+            let fileCount = 0;
+            let filteredCount = 0;
+            
+            function traverse(node) {
+                if (node.type === 'file') {
+                    const isMedia = isMediaExtension(node.name);
+                    node.isMedia = isMedia;
+                    
+                    if (isMedia) {
+                        const pathStr = node.path.join('/');
+                        const isFiltered = containsAdKeyword(pathStr);
+                        
+                        if (isFiltered) {
+                            filteredFiles.push(node);
+                            filteredCount++;
+                        } else {
+                            mediaFiles.push(node);
+                            fileCount++;
+                        }
+                    }
+                }
+                if (node.children) {
+                    for (const child of node.children) {
+                        traverse(child);
+                    }
+                }
+            }
+            
+            traverse(parsedData);
+            
+            // 更新统计
+            document.getElementById('statFiles').textContent = fileCount;
+            
+            // 显示过滤统计
+            const filteredContainer = document.getElementById('statFilteredContainer');
+            if (filteredCount > 0) {
+                filteredContainer.style.display = 'block';
+                document.getElementById('statFiltered').textContent = filteredCount;
+            } else {
+                filteredContainer.style.display = 'none';
+            }
+            
+            // 计算增量变化
+            calculateIncrementalChanges();
+            
+            // 渲染目录树
+            renderDirectoryTree();
+            
+            // 更新预览
+            updatePreview();
+        }
+
+        // ==================== 广告关键词过滤功能 ====================
+
+        // 检查路径是否包含广告关键词
+        function containsAdKeyword(path) {
+            if (!adFilterEnabled || currentAdKeywords.length === 0) {
+                return false;
+            }
+            const lowerPath = path.toLowerCase();
+            return currentAdKeywords.some(keyword => lowerPath.includes(keyword.toLowerCase()));
+        }
+
+        // 渲染广告关键词标签列表
+        function renderAdKeywordTags() {
+            const container = document.getElementById('adKeywordTagList');
+            container.innerHTML = '';
+            
+            for (const keyword of currentAdKeywords) {
+                const tag = document.createElement('span');
+                tag.className = 'tag-item';
+                tag.innerHTML = `
+                    ${escapeHtml(keyword)}
+                    <button class="tag-item-remove" onclick="removeAdKeyword('${escapeHtml(keyword).replace(/'/g, "\\'")}')">×</button>
+                `;
+                container.appendChild(tag);
+            }
+        }
+
+        // 添加广告关键词
+        function addAdKeyword() {
+            const input = document.getElementById('adKeywordInput');
+            const keyword = input.value.trim();
+            
+            if (!keyword) {
+                showToast('请输入关键词', 'error');
+                return;
+            }
+            
+            if (currentAdKeywords.some(k => k.toLowerCase() === keyword.toLowerCase())) {
+                showToast('该关键词已存在', 'error');
+                return;
+            }
+            
+            currentAdKeywords.push(keyword);
+            saveAdKeywordsToStorage();
+            renderAdKeywordTags();
+            input.value = '';
+            showToast(`已添加关键词: ${keyword}`, 'success');
+            
+            // 如果有已解析的数据，重新解析
+            if (parsedData) {
+                reprocessMediaFiles();
+            }
+        }
+
+        // 删除广告关键词
+        function removeAdKeyword(keyword) {
+            const index = currentAdKeywords.findIndex(k => k === keyword);
+            if (index > -1) {
+                currentAdKeywords.splice(index, 1);
+                saveAdKeywordsToStorage();
+                renderAdKeywordTags();
+                showToast(`已删除关键词: ${keyword}`, 'info');
+                
+                // 如果有已解析的数据，重新解析
+                if (parsedData) {
+                    reprocessMediaFiles();
+                }
+            }
+        }
+
+        // 重置为默认广告关键词
+        function resetAdKeywords() {
+            currentAdKeywords = [...DEFAULT_AD_KEYWORDS];
+            saveAdKeywordsToStorage();
+            renderAdKeywordTags();
+            showToast('已重置为默认关键词列表', 'success');
+            
+            // 如果有已解析的数据，重新解析
+            if (parsedData) {
+                reprocessMediaFiles();
+            }
+        }
+
+        // 处理回车键添加广告关键词
+        function handleAdKeywordKeypress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addAdKeyword();
+            }
+        }
+
+        // 保存广告关键词到 localStorage
+        function saveAdKeywordsToStorage() {
+            localStorage.setItem('strmAdKeywords', JSON.stringify(currentAdKeywords));
+        }
+
+        // 从 localStorage 加载广告关键词
+        function loadAdKeywordsFromStorage() {
+            const saved = localStorage.getItem('strmAdKeywords');
+            if (saved) {
+                try {
+                    currentAdKeywords = JSON.parse(saved);
+                } catch (e) {
+                    currentAdKeywords = [...DEFAULT_AD_KEYWORDS];
+                }
+            }
+            
+            // 加载广告过滤开关状态
+            const savedToggle = localStorage.getItem('strmAdFilterEnabled');
+            if (savedToggle !== null) {
+                adFilterEnabled = savedToggle === 'true';
+            }
+        }
+
+        // 初始化广告过滤开关监听器
+        function initAdFilterToggle() {
+            const toggle = document.getElementById('adFilterToggle');
+            const status = document.getElementById('adFilterStatus');
+            
+            // 设置初始状态
+            toggle.checked = adFilterEnabled;
+            status.textContent = adFilterEnabled ? '开启' : '关闭';
+            status.className = adFilterEnabled ? 'toggle-status active' : 'toggle-status';
+            
+            toggle.addEventListener('change', (e) => {
+                adFilterEnabled = e.target.checked;
+                status.textContent = adFilterEnabled ? '开启' : '关闭';
+                status.className = adFilterEnabled ? 'toggle-status active' : 'toggle-status';
+                localStorage.setItem('strmAdFilterEnabled', adFilterEnabled);
+                
+                // 如果有已解析的数据，重新解析
+                if (parsedData) {
+                    reprocessMediaFiles();
+                }
+            });
+        }
+
+        // ==================== 增量更新功能 ====================
+
+        // 从 localStorage 加载上次的文件列表
+        function loadPreviousFileList() {
+            const saved = localStorage.getItem('strmPreviousFiles');
+            if (saved) {
+                try {
+                    previousFileSet = new Set(JSON.parse(saved));
+                } catch (e) {
+                    previousFileSet = new Set();
+                }
+            }
+        }
+
+        // 保存当前文件列表到 localStorage
+        function savePreviousFileList() {
+            const fileList = mediaFiles
+                .filter(f => !excludedPaths.has(f.path.join('/')))
+                .map(f => f.path.join('/'));
+            localStorage.setItem('strmPreviousFiles', JSON.stringify(fileList));
+        }
+
+        // 计算增量变化
+        function calculateIncrementalChanges() {
+            const currentFileSet = new Set(
+                mediaFiles
+                    .filter(f => !excludedPaths.has(f.path.join('/')))
+                    .map(f => f.path.join('/'))
+            );
+            
+            newFiles = [];
+            deletedFiles = [];
+            unchangedFiles = [];
+            
+            // 找出新增文件
+            for (const path of currentFileSet) {
+                if (!previousFileSet.has(path)) {
+                    const file = mediaFiles.find(f => f.path.join('/') === path);
+                    if (file) {
+                        newFiles.push(file);
+                    }
+                } else {
+                    const file = mediaFiles.find(f => f.path.join('/') === path);
+                    if (file) {
+                        unchangedFiles.push(file);
+                    }
+                }
+            }
+            
+            // 找出删除的文件
+            for (const path of previousFileSet) {
+                if (!currentFileSet.has(path)) {
+                    deletedFiles.push(path);
+                }
+            }
+            
+            // 更新UI
+            updateIncrementalStatsUI();
+        }
+
+        // 更新增量统计UI
+        function updateIncrementalStatsUI() {
+            const statsContainer = document.getElementById('incrementalStats');
+            const hasHistory = previousFileSet.size > 0;
+            
+            if (hasHistory) {
+                statsContainer.style.display = 'block';
+                document.getElementById('statNewFiles').textContent = newFiles.length;
+                document.getElementById('statDeletedFiles').textContent = deletedFiles.length;
+                document.getElementById('statUnchangedFiles').textContent = unchangedFiles.length;
+                
+                // 显示/隐藏"仅下载新增"按钮
+                const newBtn = document.getElementById('generateNewBtn');
+                if (newFiles.length > 0) {
+                    newBtn.style.display = 'inline-flex';
+                    document.getElementById('btnBadgeNew').textContent = newFiles.length;
+                } else {
+                    newBtn.style.display = 'none';
+                }
+            } else {
+                statsContainer.style.display = 'none';
+                document.getElementById('generateNewBtn').style.display = 'none';
+            }
+            
+            // 更新全部下载按钮的数量
+            const activeFiles = mediaFiles.filter(f => !excludedPaths.has(f.path.join('/')));
+            document.getElementById('btnBadgeAll').textContent = activeFiles.length;
+        }
+
+        // 清除历史文件记录
+        function clearPreviousFiles() {
+            previousFileSet = new Set();
+            localStorage.removeItem('strmPreviousFiles');
+            newFiles = [];
+            deletedFiles = [];
+            unchangedFiles = [];
+            document.getElementById('incrementalStats').style.display = 'none';
+            document.getElementById('generateNewBtn').style.display = 'none';
+            showToast('历史记录已清除', 'success');
+            
+            // 重新渲染目录树
+            if (parsedData) {
+                renderDirectoryTree();
+            }
+        }
+
+        // ==================== 目录结构预览功能 ====================
+
+        // 渲染目录树（新版本带复选框）
+        function renderDirectoryTree() {
+            const container = document.getElementById('directoryTreeContainer');
+            container.innerHTML = '';
+            
+            if (!parsedData || !parsedData.children || parsedData.children.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">暂无数据</div>';
+                return;
+            }
+            
+            // 构建树形数据
+            treeData = buildTreeData(parsedData);
+            
+            // 渲染树
+            for (const child of treeData.children) {
+                const element = createTreeElement(child, 0);
+                container.appendChild(element);
+            }
+            
+            // 更新统计
+            updateSelectionStats();
+        }
+
+        // 构建树形数据
+        function buildTreeData(node, parentPath = '') {
+            const result = {
+                name: node.name,
+                type: node.type,
+                path: node.path ? node.path.join('/') : '',
+                isExpanded: true,
+                isExcluded: node.path ? excludedPaths.has(node.path.join('/')) : false,
+                isFiltered: false,
+                isNew: false,
+                children: []
+            };
+            
+            // 检查是否被广告过滤
+            if (node.path) {
+                const pathStr = node.path.join('/');
+                result.isFiltered = containsAdKeyword(pathStr);
+                result.isNew = newFiles.some(f => f.path.join('/') === pathStr);
+            }
+            
+            if (node.children) {
+                let mediaCount = 0;
+                for (const child of node.children) {
+                    const childData = buildTreeData(child, result.path);
+                    result.children.push(childData);
+                    if (childData.type === 'file' && child.isMedia && !childData.isFiltered) {
+                        mediaCount++;
+                    }
+                    if (childData.type === 'folder') {
+                        mediaCount += childData.mediaCount || 0;
+                    }
+                }
+                result.mediaCount = mediaCount;
+            }
+            
+            return result;
+        }
+
+        // 创建树元素
+        function createTreeElement(node, depth) {
+            const div = document.createElement('div');
+            div.className = 'tree-item';
+            div.dataset.path = node.path;
+            
+            const header = document.createElement('div');
+            header.className = 'tree-item-header';
+            
+            // 展开/折叠按钮
+            const toggle = document.createElement('span');
+            toggle.className = 'tree-item-toggle' + (node.children && node.children.length > 0 ? (node.isExpanded ? ' expanded' : '') : ' hidden');
+            toggle.textContent = '▶';
+            toggle.onclick = (e) => {
+                e.stopPropagation();
+                toggleTreeItem(node, div);
+            };
+            header.appendChild(toggle);
+            
+            // 复选框
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'tree-item-checkbox';
+            checkbox.checked = !node.isExcluded && !node.isFiltered;
+            checkbox.disabled = node.isFiltered;
+            checkbox.onchange = (e) => {
+                e.stopPropagation();
+                toggleExclusion(node, !e.target.checked, div);
+            };
+            header.appendChild(checkbox);
+            
+            // 图标
+            const icon = document.createElement('span');
+            icon.className = 'tree-item-icon';
+            icon.textContent = node.type === 'folder' ? '📁' : '🎬';
+            header.appendChild(icon);
+            
+            // 名称
+            const name = document.createElement('span');
+            name.className = 'tree-item-name' + (node.type === 'folder' ? ' folder' : '') + (node.isExcluded || node.isFiltered ? ' excluded' : '');
+            name.textContent = node.name;
+            header.appendChild(name);
+            
+            // 文件数量（仅文件夹）
+            if (node.type === 'folder' && node.mediaCount !== undefined) {
+                const count = document.createElement('span');
+                count.className = 'tree-item-count';
+                count.textContent = `${node.mediaCount} 文件`;
+                header.appendChild(count);
+            }
+            
+            // 状态标签
+            if (node.isNew) {
+                const status = document.createElement('span');
+                status.className = 'tree-item-status new';
+                status.textContent = '新增';
+                header.appendChild(status);
+            }
+            if (node.isFiltered) {
+                const status = document.createElement('span');
+                status.className = 'tree-item-status filtered';
+                status.textContent = '已过滤';
+                header.appendChild(status);
+            }
+            
+            div.appendChild(header);
+            
+            // 子节点容器
+            if (node.children && node.children.length > 0) {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'tree-item-children' + (node.isExpanded ? ' expanded' : '');
+                
+                for (const child of node.children) {
+                    const childElement = createTreeElement(child, depth + 1);
+                    childrenContainer.appendChild(childElement);
+                }
+                
+                div.appendChild(childrenContainer);
+            }
+            
+            return div;
+        }
+
+        // 切换树节点展开/折叠
+        function toggleTreeItem(node, element) {
+            node.isExpanded = !node.isExpanded;
+            const toggle = element.querySelector('.tree-item-toggle');
+            const children = element.querySelector('.tree-item-children');
+            
+            if (toggle) {
+                toggle.classList.toggle('expanded', node.isExpanded);
+            }
+            if (children) {
+                children.classList.toggle('expanded', node.isExpanded);
+            }
+        }
+
+        // 切换排除状态
+        function toggleExclusion(node, excluded, element) {
+            const pathStr = node.path;
+            
+            if (excluded) {
+                excludedPaths.add(pathStr);
+            } else {
+                excludedPaths.delete(pathStr);
+            }
+            
+            node.isExcluded = excluded;
+            
+            // 更新子节点
+            if (node.children) {
+                updateChildrenExclusion(node, excluded, element);
+            }
+            
+            // 更新UI
+            const name = element.querySelector('.tree-item-name');
+            if (name) {
+                name.classList.toggle('excluded', excluded || node.isFiltered);
+            }
+            
+            // 保存排除列表
+            saveExcludedPaths();
+            
+            // 更新统计
+            updateSelectionStats();
+            calculateIncrementalChanges();
+        }
+
+        // 更新子节点排除状态
+        function updateChildrenExclusion(node, excluded, element) {
+            const childrenContainer = element.querySelector('.tree-item-children');
+            if (!childrenContainer) return;
+            
+            const childElements = childrenContainer.querySelectorAll(':scope > .tree-item');
+            node.children.forEach((child, index) => {
+                if (childElements[index]) {
+                    const checkbox = childElements[index].querySelector('.tree-item-checkbox');
+                    const name = childElements[index].querySelector('.tree-item-name');
+                    
+                    if (!child.isFiltered) {
+                        if (excluded) {
+                            excludedPaths.add(child.path);
+                        } else {
+                            excludedPaths.delete(child.path);
+                        }
+                        child.isExcluded = excluded;
+                        
+                        if (checkbox) {
+                            checkbox.checked = !excluded;
+                        }
+                        if (name) {
+                            name.classList.toggle('excluded', excluded);
+                        }
+                    }
+                    
+                    if (child.children) {
+                        updateChildrenExclusion(child, excluded, childElements[index]);
+                    }
+                }
+            });
+        }
+
+        // 保存排除路径到 localStorage
+        function saveExcludedPaths() {
+            localStorage.setItem('strmExcludedPaths', JSON.stringify([...excludedPaths]));
+        }
+
+        // 从 localStorage 加载排除路径
+        function loadExcludedPaths() {
+            const saved = localStorage.getItem('strmExcludedPaths');
+            if (saved) {
+                try {
+                    excludedPaths = new Set(JSON.parse(saved));
+                } catch (e) {
+                    excludedPaths = new Set();
+                }
+            }
+        }
+
+        // 更新选择统计
+        function updateSelectionStats() {
+            let folderCount = 0;
+            let fileCount = 0;
+            let selectedCount = 0;
+            
+            function countNodes(node) {
+                if (node.type === 'folder') {
+                    folderCount++;
+                    if (node.children) {
+                        node.children.forEach(countNodes);
+                    }
+                } else if (node.type === 'file') {
+                    fileCount++;
+                    if (!node.isExcluded && !node.isFiltered) {
+                        selectedCount++;
+                    }
+                }
+            }
+            
+            if (treeData && treeData.children) {
+                treeData.children.forEach(countNodes);
+            }
+            
+            document.getElementById('selectedFolderCount').textContent = folderCount;
+            document.getElementById('selectedFileCount').textContent = fileCount;
+            document.getElementById('totalSelectedSize').textContent = selectedCount;
+        }
+
+        // 展开所有节点
+        function expandAllTree() {
+            const container = document.getElementById('directoryTreeContainer');
+            container.querySelectorAll('.tree-item-toggle:not(.hidden)').forEach(toggle => {
+                toggle.classList.add('expanded');
+            });
+            container.querySelectorAll('.tree-item-children').forEach(children => {
+                children.classList.add('expanded');
+            });
+            
+            // 更新数据
+            function expandAll(node) {
+                node.isExpanded = true;
+                if (node.children) {
+                    node.children.forEach(expandAll);
+                }
+            }
+            if (treeData) {
+                expandAll(treeData);
+            }
+        }
+
+        // 折叠所有节点
+        function collapseAllTree() {
+            const container = document.getElementById('directoryTreeContainer');
+            container.querySelectorAll('.tree-item-toggle:not(.hidden)').forEach(toggle => {
+                toggle.classList.remove('expanded');
+            });
+            container.querySelectorAll('.tree-item-children').forEach(children => {
+                children.classList.remove('expanded');
+            });
+            
+            // 更新数据
+            function collapseAll(node) {
+                node.isExpanded = false;
+                if (node.children) {
+                    node.children.forEach(collapseAll);
+                }
+            }
+            if (treeData) {
+                collapseAll(treeData);
+            }
+        }
+
+        // 全选所有项目
+        function selectAllItems() {
+            excludedPaths.clear();
+            saveExcludedPaths();
+            renderDirectoryTree();
+            calculateIncrementalChanges();
+            showToast('已全选所有文件', 'success');
+        }
+
+        // 取消全选
+        function deselectAllItems() {
+            // 添加所有媒体文件路径到排除列表
+            mediaFiles.forEach(file => {
+                excludedPaths.add(file.path.join('/'));
+            });
+            saveExcludedPaths();
+            renderDirectoryTree();
+            calculateIncrementalChanges();
+            showToast('已取消选择所有文件', 'info');
+        }
+
+        // ==================== WebDAV 功能 ====================
+
+        // 切换 WebDAV 面板展开/收起
+        function toggleWebdavPanel() {
+            const panel = document.getElementById('webdavPanel');
+            panel.classList.toggle('expanded');
+            // 保存展开状态到localStorage
+            localStorage.setItem('strm_webdav_panelExpanded', panel.classList.contains('expanded'));
+        }
+
+        // 显示 WebDAV 消息
+        function showWebdavMessage(message, type) {
+            const msgEl = document.getElementById('webdavMessage');
+            msgEl.textContent = message;
+            msgEl.className = `webdav-message visible ${type}`;
+        }
+
+        // 隐藏 WebDAV 消息
+        function hideWebdavMessage() {
+            const msgEl = document.getElementById('webdavMessage');
+            msgEl.className = 'webdav-message';
+        }
+
+        // 更新 WebDAV 状态
+        function updateWebdavStatus(status, type) {
+            const statusEl = document.getElementById('webdavStatus');
+            statusEl.textContent = status;
+            statusEl.className = `collapsible-status ${type || ''}`;
+        }
+
+        // 从 WebDAV 获取文件
+        async function fetchFromWebdav() {
+            const url = document.getElementById('webdavUrl').value.trim();
+            const user = document.getElementById('webdavUser').value.trim();
+            const pass = document.getElementById('webdavPass').value;
+            const filePath = document.getElementById('webdavFilePath').value.trim();
+            
+            // 验证输入
+            if (!url) {
+                showWebdavMessage('请输入 WebDAV 服务器 URL', 'error');
+                return;
+            }
+            if (!filePath) {
+                showWebdavMessage('请输入 txt 文件路径', 'error');
+                return;
+            }
+            
+            // 构建完整 URL
+            let fullUrl = url.replace(/\/+$/, '');
+            if (!filePath.startsWith('/')) {
+                fullUrl += '/';
+            }
+            fullUrl += filePath;
+            
+            // 显示加载状态
+            const btn = document.getElementById('webdavConnectBtn');
+            const btnText = document.getElementById('webdavBtnText');
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="spinner"></span> 连接中...';
+            hideWebdavMessage();
+            updateWebdavStatus('连接中...', '');
+            
+            try {
+                // 构建请求头
+                const headers = {};
+                if (user) {
+                    const credentials = btoa(`${user}:${pass}`);
+                    headers['Authorization'] = `Basic ${credentials}`;
+                }
+                
+                // 发送 GET 请求获取文件内容
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: headers,
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // 获取文件内容
+                const arrayBuffer = await response.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
+                
+                // 检测编码
+                let content;
+                if (uint8Array.length >= 2 && uint8Array[0] === 0xFF && uint8Array[1] === 0xFE) {
+                    const decoder = new TextDecoder('utf-16le');
+                    content = decoder.decode(arrayBuffer);
+                } else if (uint8Array.length >= 2 && uint8Array[0] === 0xFE && uint8Array[1] === 0xFF) {
+                    const decoder = new TextDecoder('utf-16be');
+                    content = decoder.decode(arrayBuffer);
+                } else if (uint8Array.length >= 3 && uint8Array[0] === 0xEF && uint8Array[1] === 0xBB && uint8Array[2] === 0xBF) {
+                    const decoder = new TextDecoder('utf-8');
+                    content = decoder.decode(arrayBuffer);
+                } else {
+                    const decoder = new TextDecoder('utf-8');
+                    content = decoder.decode(arrayBuffer);
+                }
+                
+                // 显示文件信息
+                const fileName = filePath.split('/').pop() || 'webdav_file.txt';
+                document.getElementById('fileName').textContent = fileName;
+                document.getElementById('fileSize').textContent = formatFileSize(arrayBuffer.byteLength);
+                document.getElementById('fileInfo').classList.add('visible');
+                
+                // 解析目录树
+                parseDirectoryTree(content);
+                
+                showWebdavMessage('文件获取成功！', 'success');
+                updateWebdavStatus('已连接', 'connected');
+                showToast('WebDAV 文件获取成功', 'success');
+                
+            } catch (error) {
+                console.error('WebDAV 错误:', error);
+                let errorMsg = error.message;
+                
+                // 处理常见错误
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    errorMsg = 'CORS 错误：无法连接到服务器。请检查服务器是否允许跨域访问，或使用 CORS 代理/浏览器扩展。';
+                }
+                
+                showWebdavMessage(errorMsg, 'error');
+                updateWebdavStatus('连接失败', 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = '连接并获取';
+            }
+        }
+
+        // 保存 WebDAV 配置到 localStorage（自动触发）
+        function autoSaveWebdavConfig() {
+            localStorage.setItem('strm_webdav_url', document.getElementById('webdavUrl').value.trim());
+            localStorage.setItem('strm_webdav_user', document.getElementById('webdavUser').value.trim());
+            localStorage.setItem('strm_webdav_filePath', document.getElementById('webdavFilePath').value.trim());
+            
+            // 只有在勾选了"记住密码"时才保存密码
+            const rememberPassword = document.getElementById('rememberPassword').checked;
+            localStorage.setItem('strm_webdav_rememberPass', rememberPassword);
+            if (rememberPassword) {
+                localStorage.setItem('strm_webdav_pass', document.getElementById('webdavPass').value);
+            } else {
+                localStorage.removeItem('strm_webdav_pass');
+            }
+        }
+
+        // 手动保存 WebDAV 配置按钮
+        function saveWebdavConfig() {
+            autoSaveWebdavConfig();
+            const rememberPassword = document.getElementById('rememberPassword').checked;
+            if (rememberPassword) {
+                showToast('WebDAV 配置已保存（包含密码）', 'success');
+            } else {
+                showToast('WebDAV 配置已保存（密码未保存）', 'success');
+            }
+        }
+
+        // 从 localStorage 加载 WebDAV 配置
+        function loadWebdavConfig() {
+            // 加载URL
+            const url = localStorage.getItem('strm_webdav_url');
+            if (url) document.getElementById('webdavUrl').value = url;
+            
+            // 加载用户名
+            const user = localStorage.getItem('strm_webdav_user');
+            if (user) document.getElementById('webdavUser').value = user;
+            
+            // 加载文件路径
+            const filePath = localStorage.getItem('strm_webdav_filePath');
+            if (filePath) document.getElementById('webdavFilePath').value = filePath;
+            
+            // 加载记住密码选项
+            const rememberPass = localStorage.getItem('strm_webdav_rememberPass') === 'true';
+            document.getElementById('rememberPassword').checked = rememberPass;
+            
+            // 如果勾选了记住密码，加载密码
+            if (rememberPass) {
+                const pass = localStorage.getItem('strm_webdav_pass');
+                if (pass) document.getElementById('webdavPass').value = pass;
+            }
+            
+            // 加载面板展开状态
+            const panelExpanded = localStorage.getItem('strm_webdav_panelExpanded') === 'true';
+            if (panelExpanded) {
+                document.getElementById('webdavPanel').classList.add('expanded');
+            }
+            
+            // 兼容旧版配置（strmWebdavConfig）
+            const oldConfig = localStorage.getItem('strmWebdavConfig');
+            if (oldConfig && !url) {
+                try {
+                    const config = JSON.parse(oldConfig);
+                    if (config.url) document.getElementById('webdavUrl').value = config.url;
+                    if (config.user) document.getElementById('webdavUser').value = config.user;
+                    if (config.filePath) document.getElementById('webdavFilePath').value = config.filePath;
+                    // 迁移到新格式
+                    autoSaveWebdavConfig();
+                    // 删除旧配置
+                    localStorage.removeItem('strmWebdavConfig');
+                } catch (e) {
+                    console.error('加载旧版 WebDAV 配置失败:', e);
+                }
+            }
+        }
+
+        // 为WebDAV输入框添加自动保存监听器
+        function initWebdavAutoSave() {
+            document.getElementById('webdavUrl').addEventListener('input', autoSaveWebdavConfig);
+            document.getElementById('webdavUser').addEventListener('input', autoSaveWebdavConfig);
+            document.getElementById('webdavPass').addEventListener('input', autoSaveWebdavConfig);
+            document.getElementById('webdavFilePath').addEventListener('input', autoSaveWebdavConfig);
+            document.getElementById('rememberPassword').addEventListener('change', autoSaveWebdavConfig);
+        }
+
+        // ==================== WebDAV 目录浏览功能 ====================
+
+        // 当前浏览路径
+        let currentBrowsePath = '/';
+
+        // 模态框拖动和缩放状态
+        let modalDragState = {
+            isDragging: false,
+            isResizing: false,
+            resizeDirection: null,
+            startX: 0,
+            startY: 0,
+            startLeft: 0,
+            startTop: 0,
+            startWidth: 0,
+            startHeight: 0
+        };
+
+        // 模态框最小/最大尺寸
+        const MODAL_MIN_WIDTH = 400;
+        const MODAL_MIN_HEIGHT = 300;
+        const MODAL_MAX_WIDTH_PERCENT = 0.9;
+        const MODAL_MAX_HEIGHT_PERCENT = 0.9;
+
+        // 默认模态框尺寸
+        const DEFAULT_MODAL_WIDTH = 600;
+        const DEFAULT_MODAL_HEIGHT = 500;
+
+        // 打开目录浏览器
+        async function openWebdavBrowser() {
+            const url = document.getElementById('webdavUrl').value.trim();
+            
+            if (!url) {
+                showWebdavMessage('请先输入 WebDAV 服务器 URL', 'error');
+                return;
+            }
+            
+            const browser = document.getElementById('webdavBrowser');
+            const overlay = document.getElementById('webdavModalOverlay');
+            
+            // 恢复保存的尺寸和位置
+            restoreModalState(browser);
+            
+            // 显示遮罩层和模态框
+            overlay.classList.add('visible');
+            browser.classList.add('visible');
+            
+            // 从根目录开始浏览
+            currentBrowsePath = '/';
+            await loadWebdavDirectory('/');
+        }
+
+        // 关闭目录浏览器
+        function closeWebdavBrowser() {
+            const browser = document.getElementById('webdavBrowser');
+            const overlay = document.getElementById('webdavModalOverlay');
+            
+            // 保存当前尺寸和位置
+            saveModalState(browser);
+            
+            // 隐藏模态框和遮罩层
+            browser.classList.remove('visible');
+            overlay.classList.remove('visible');
+        }
+
+        // 点击遮罩层关闭模态框
+        function handleOverlayClick(event) {
+            if (event.target === event.currentTarget) {
+                closeWebdavBrowser();
+            }
+        }
+
+        // 保存模态框状态到localStorage
+        function saveModalState(modal) {
+            const rect = modal.getBoundingClientRect();
+            const state = {
+                width: modal.offsetWidth,
+                height: modal.offsetHeight,
+                // 保存相对于视口中心的偏移
+                offsetX: rect.left + rect.width / 2 - window.innerWidth / 2,
+                offsetY: rect.top + rect.height / 2 - window.innerHeight / 2
+            };
+            localStorage.setItem('strm_webdav_modal_state', JSON.stringify(state));
+        }
+
+        // 从localStorage恢复模态框状态
+        function restoreModalState(modal) {
+            const savedState = localStorage.getItem('strm_webdav_modal_state');
+            
+            if (savedState) {
+                try {
+                    const state = JSON.parse(savedState);
+                    
+                    // 限制尺寸在允许范围内
+                    const maxWidth = window.innerWidth * MODAL_MAX_WIDTH_PERCENT;
+                    const maxHeight = window.innerHeight * MODAL_MAX_HEIGHT_PERCENT;
+                    const width = Math.min(Math.max(state.width, MODAL_MIN_WIDTH), maxWidth);
+                    const height = Math.min(Math.max(state.height, MODAL_MIN_HEIGHT), maxHeight);
+                    
+                    modal.style.width = width + 'px';
+                    modal.style.height = height + 'px';
+                    
+                    // 恢复位置（如果有保存的偏移）
+                    if (state.offsetX !== undefined && state.offsetY !== undefined) {
+                        // 确保模态框在视口内
+                        const halfWidth = width / 2;
+                        const halfHeight = height / 2;
+                        const maxOffsetX = window.innerWidth / 2 - halfWidth;
+                        const maxOffsetY = window.innerHeight / 2 - halfHeight;
+                        
+                        const offsetX = Math.min(Math.max(state.offsetX, -maxOffsetX), maxOffsetX);
+                        const offsetY = Math.min(Math.max(state.offsetY, -maxOffsetY), maxOffsetY);
+                        
+                        modal.style.left = `calc(50% + ${offsetX}px)`;
+                        modal.style.top = `calc(50% + ${offsetY}px)`;
+                    }
+                } catch (e) {
+                    console.error('恢复模态框状态失败:', e);
+                    resetModalState(modal);
+                }
+            } else {
+                resetModalState(modal);
+            }
+        }
+
+        // 重置模态框到默认状态
+        function resetModalState(modal) {
+            modal.style.width = Math.min(DEFAULT_MODAL_WIDTH, window.innerWidth * 0.9) + 'px';
+            modal.style.height = Math.min(DEFAULT_MODAL_HEIGHT, window.innerHeight * 0.8) + 'px';
+            modal.style.left = '50%';
+            modal.style.top = '50%';
+        }
+
+        // 初始化模态框拖动功能
+        function initModalDrag() {
+            const header = document.getElementById('webdavBrowserHeader');
+            const modal = document.getElementById('webdavBrowser');
+            
+            header.addEventListener('mousedown', startDrag);
+            header.addEventListener('touchstart', startDrag, { passive: false });
+            
+            function startDrag(e) {
+                // 如果点击的是关闭按钮，不处理拖动
+                if (e.target.closest('.webdav-browser-close')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                
+                const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                
+                const rect = modal.getBoundingClientRect();
+                
+                modalDragState.isDragging = true;
+                modalDragState.startX = clientX;
+                modalDragState.startY = clientY;
+                modalDragState.startLeft = rect.left + rect.width / 2;
+                modalDragState.startTop = rect.top + rect.height / 2;
+                
+                modal.classList.add('dragging');
+                
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchmove', onDrag, { passive: false });
+                document.addEventListener('touchend', stopDrag);
+            }
+            
+            function onDrag(e) {
+                if (!modalDragState.isDragging) return;
+                
+                e.preventDefault();
+                
+                const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                
+                const deltaX = clientX - modalDragState.startX;
+                const deltaY = clientY - modalDragState.startY;
+                
+                let newCenterX = modalDragState.startLeft + deltaX;
+                let newCenterY = modalDragState.startTop + deltaY;
+                
+                // 限制在视口内
+                const halfWidth = modal.offsetWidth / 2;
+                const halfHeight = modal.offsetHeight / 2;
+                
+                newCenterX = Math.max(halfWidth, Math.min(window.innerWidth - halfWidth, newCenterX));
+                newCenterY = Math.max(halfHeight, Math.min(window.innerHeight - halfHeight, newCenterY));
+                
+                modal.style.left = newCenterX + 'px';
+                modal.style.top = newCenterY + 'px';
+                modal.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            function stopDrag() {
+                if (!modalDragState.isDragging) return;
+                
+                modalDragState.isDragging = false;
+                modal.classList.remove('dragging');
+                
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchmove', onDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+        }
+
+        // 初始化模态框缩放功能
+        function initModalResize() {
+            const modal = document.getElementById('webdavBrowser');
+            const handles = modal.querySelectorAll('.webdav-resize-handle');
+            
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startResize);
+                handle.addEventListener('touchstart', startResize, { passive: false });
+            });
+            
+            function startResize(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                
+                const rect = modal.getBoundingClientRect();
+                
+                modalDragState.isResizing = true;
+                modalDragState.resizeDirection = e.target.dataset.direction;
+                modalDragState.startX = clientX;
+                modalDragState.startY = clientY;
+                modalDragState.startWidth = rect.width;
+                modalDragState.startHeight = rect.height;
+                modalDragState.startLeft = rect.left + rect.width / 2;
+                modalDragState.startTop = rect.top + rect.height / 2;
+                
+                modal.classList.add('resizing');
+                
+                document.addEventListener('mousemove', onResize);
+                document.addEventListener('mouseup', stopResize);
+                document.addEventListener('touchmove', onResize, { passive: false });
+                document.addEventListener('touchend', stopResize);
+            }
+            
+            function onResize(e) {
+                if (!modalDragState.isResizing) return;
+                
+                e.preventDefault();
+                
+                const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                
+                const deltaX = clientX - modalDragState.startX;
+                const deltaY = clientY - modalDragState.startY;
+                
+                const dir = modalDragState.resizeDirection;
+                const maxWidth = window.innerWidth * MODAL_MAX_WIDTH_PERCENT;
+                const maxHeight = window.innerHeight * MODAL_MAX_HEIGHT_PERCENT;
+                
+                let newWidth = modalDragState.startWidth;
+                let newHeight = modalDragState.startHeight;
+                let newCenterX = modalDragState.startLeft;
+                let newCenterY = modalDragState.startTop;
+                
+                // 处理东西方向缩放
+                if (dir.includes('e')) {
+                    newWidth = Math.min(Math.max(modalDragState.startWidth + deltaX, MODAL_MIN_WIDTH), maxWidth);
+                    newCenterX = modalDragState.startLeft + (newWidth - modalDragState.startWidth) / 2;
+                }
+                if (dir.includes('w')) {
+                    newWidth = Math.min(Math.max(modalDragState.startWidth - deltaX, MODAL_MIN_WIDTH), maxWidth);
+                    newCenterX = modalDragState.startLeft - (newWidth - modalDragState.startWidth) / 2;
+                }
+                
+                // 处理南北方向缩放
+                if (dir.includes('s')) {
+                    newHeight = Math.min(Math.max(modalDragState.startHeight + deltaY, MODAL_MIN_HEIGHT), maxHeight);
+                    newCenterY = modalDragState.startTop + (newHeight - modalDragState.startHeight) / 2;
+                }
+                if (dir.includes('n')) {
+                    newHeight = Math.min(Math.max(modalDragState.startHeight - deltaY, MODAL_MIN_HEIGHT), maxHeight);
+                    newCenterY = modalDragState.startTop - (newHeight - modalDragState.startHeight) / 2;
+                }
+                
+                // 确保模态框在视口内
+                const halfWidth = newWidth / 2;
+                const halfHeight = newHeight / 2;
+                
+                newCenterX = Math.max(halfWidth, Math.min(window.innerWidth - halfWidth, newCenterX));
+                newCenterY = Math.max(halfHeight, Math.min(window.innerHeight - halfHeight, newCenterY));
+                
+                modal.style.width = newWidth + 'px';
+                modal.style.height = newHeight + 'px';
+                modal.style.left = newCenterX + 'px';
+                modal.style.top = newCenterY + 'px';
+                modal.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            function stopResize() {
+                if (!modalDragState.isResizing) return;
+                
+                modalDragState.isResizing = false;
+                modalDragState.resizeDirection = null;
+                modal.classList.remove('resizing');
+                
+                document.removeEventListener('mousemove', onResize);
+                document.removeEventListener('mouseup', stopResize);
+                document.removeEventListener('touchmove', onResize);
+                document.removeEventListener('touchend', stopResize);
+            }
+        }
+
+        // ESC键关闭模态框
+        function handleKeyDown(e) {
+            if (e.key === 'Escape') {
+                const browser = document.getElementById('webdavBrowser');
+                if (browser.classList.contains('visible')) {
+                    closeWebdavBrowser();
+                }
+            }
+        }
+
+        // 加载WebDAV目录内容
+        async function loadWebdavDirectory(path) {
+            const url = document.getElementById('webdavUrl').value.trim();
+            const user = document.getElementById('webdavUser').value.trim();
+            const pass = document.getElementById('webdavPass').value;
+            
+            // 显示加载状态
+            const loadingEl = document.getElementById('webdavBrowserLoading');
+            const emptyEl = document.getElementById('webdavBrowserEmpty');
+            const listEl = document.getElementById('webdavFileList');
+            
+            loadingEl.style.display = 'flex';
+            emptyEl.style.display = 'none';
+            listEl.style.display = 'none';
+            
+            // 更新当前路径
+            currentBrowsePath = path;
+            
+            // 更新面包屑导航
+            updateBreadcrumb(path);
+            
+            try {
+                // 构建完整 URL
+                let fullUrl = url.replace(/\/+$/, '');
+                if (path !== '/') {
+                    fullUrl += path;
+                }
+                
+                // 确保URL以斜杠结尾（目录）
+                if (!fullUrl.endsWith('/')) {
+                    fullUrl += '/';
+                }
+                
+                // 构建请求头
+                const headers = {
+                    'Depth': '1',
+                    'Content-Type': 'application/xml'
+                };
+                
+                if (user) {
+                    const credentials = btoa(`${user}:${pass}`);
+                    headers['Authorization'] = `Basic ${credentials}`;
+                }
+                
+                // 发送 PROPFIND 请求
+                const response = await fetch(fullUrl, {
+                    method: 'PROPFIND',
+                    headers: headers,
+                    mode: 'cors',
+                    body: '<?xml version="1.0" encoding="utf-8"?><propfind xmlns="DAV:"><prop><displayname/><resourcetype/><getcontentlength/><getlastmodified/></prop></propfind>'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // 解析响应
+                const xmlText = await response.text();
+                const items = parseWebdavResponse(xmlText, fullUrl, path);
+                
+                // 过滤和排序
+                const filteredItems = filterAndSortItems(items);
+                
+                // 显示结果
+                loadingEl.style.display = 'none';
+                
+                if (filteredItems.length === 0) {
+                    emptyEl.style.display = 'flex';
+                    listEl.style.display = 'none';
+                } else {
+                    emptyEl.style.display = 'none';
+                    listEl.style.display = 'block';
+                    renderFileList(filteredItems);
+                }
+                
+            } catch (error) {
+                console.error('WebDAV 目录浏览错误:', error);
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'flex';
+                emptyEl.innerHTML = `
+                    <div class="webdav-browser-empty-icon">❌</div>
+                    <span>加载失败: ${error.message}</span>
+                `;
+            }
+        }
+
+        // 解析WebDAV XML响应
+        function parseWebdavResponse(xmlText, baseUrl, currentPath) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+            
+            const items = [];
+            const responses = xmlDoc.getElementsByTagNameNS('DAV:', 'response');
+            
+            // 获取基础URL的路径部分，用于过滤当前目录本身
+            const baseUrlObj = new URL(baseUrl);
+            const basePath = baseUrlObj.pathname;
+            
+            for (const response of responses) {
+                const hrefEl = response.getElementsByTagNameNS('DAV:', 'href')[0];
+                if (!hrefEl) continue;
+                
+                let href = hrefEl.textContent;
+                
+                // 解码URL编码的路径
+                try {
+                    href = decodeURIComponent(href);
+                } catch (e) {
+                    // 如果解码失败，使用原始值
+                }
+                
+                // 跳过当前目录本身
+                const normalizedHref = href.replace(/\/+$/, '');
+                const normalizedBase = basePath.replace(/\/+$/, '');
+                if (normalizedHref === normalizedBase || normalizedHref === '') {
+                    continue;
+                }
+                
+                // 获取资源类型
+                const resourceType = response.getElementsByTagNameNS('DAV:', 'resourcetype')[0];
+                const isCollection = resourceType && resourceType.getElementsByTagNameNS('DAV:', 'collection').length > 0;
+                
+                // 获取显示名称
+                let displayName = '';
+                const displayNameEl = response.getElementsByTagNameNS('DAV:', 'displayname')[0];
+                if (displayNameEl && displayNameEl.textContent) {
+                    displayName = displayNameEl.textContent;
+                } else {
+                    // 从路径中提取名称
+                    const pathParts = href.replace(/\/+$/, '').split('/');
+                    displayName = pathParts[pathParts.length - 1] || '';
+                }
+                
+                if (!displayName) continue;
+                
+                // 获取文件大小
+                let size = 0;
+                const sizeEl = response.getElementsByTagNameNS('DAV:', 'getcontentlength')[0];
+                if (sizeEl && sizeEl.textContent) {
+                    size = parseInt(sizeEl.textContent, 10) || 0;
+                }
+                
+                // 获取最后修改时���
+                let lastModified = '';
+                const modifiedEl = response.getElementsByTagNameNS('DAV:', 'getlastmodified')[0];
+                if (modifiedEl && modifiedEl.textContent) {
+                    try {
+                        const date = new Date(modifiedEl.textContent);
+                        lastModified = date.toLocaleDateString('zh-CN');
+                    } catch (e) {
+                        lastModified = modifiedEl.textContent;
+                    }
+                }
+                
+                // 构建完整路径
+                let itemPath = currentPath;
+                if (!itemPath.endsWith('/')) {
+                    itemPath += '/';
+                }
+                itemPath += displayName;
+                
+                items.push({
+                    name: displayName,
+                    path: itemPath,
+                    isDirectory: isCollection,
+                    size: size,
+                    lastModified: lastModified
+                });
+            }
+            
+            return items;
+        }
+
+        // 过滤和排序项目（只显示文件夹和txt文件）
+        function filterAndSortItems(items) {
+            // 过滤：只保留文件夹和txt文件
+            const filtered = items.filter(item => {
+                if (item.isDirectory) {
+                    return true;
+                }
+                // 只显示.txt文件
+                return item.name.toLowerCase().endsWith('.txt');
+            });
+            
+            // 排序：文件夹在前，然后按名称排序
+            filtered.sort((a, b) => {
+                // 文件夹优先
+                if (a.isDirectory && !b.isDirectory) return -1;
+                if (!a.isDirectory && b.isDirectory) return 1;
+                // 按名称排序
+                return a.name.localeCompare(b.name, 'zh-CN');
+            });
+            
+            return filtered;
+        }
+
+        // 渲染文件列表
+        function renderFileList(items) {
+            const listEl = document.getElementById('webdavFileList');
+            listEl.innerHTML = '';
+            
+            for (const item of items) {
+                const li = document.createElement('li');
+                li.className = 'webdav-file-item';
+                li.dataset.path = item.path;
+                li.dataset.isDirectory = item.isDirectory;
+                
+                const icon = item.isDirectory ? '📁' : '📄';
+                const meta = item.isDirectory 
+                    ? '文件夹' 
+                    : `${formatFileSize(item.size)} • ${item.lastModified || ''}`;
+                const arrow = item.isDirectory ? '<span class="webdav-file-arrow">›</span>' : '';
+                
+                li.innerHTML = `
+                    <span class="webdav-file-icon">${icon}</span>
+                    <div class="webdav-file-info">
+                        <div class="webdav-file-name">${escapeHtml(item.name)}</div>
+                        <div class="webdav-file-meta">${meta}</div>
+                    </div>
+                    ${arrow}
+                `;
+                
+                li.addEventListener('click', () => handleFileItemClick(item));
+                listEl.appendChild(li);
+            }
+        }
+
+        // 更新面包屑导航
+        function updateBreadcrumb(path) {
+            const breadcrumb = document.getElementById('webdavBreadcrumb');
+            breadcrumb.innerHTML = '';
+            
+            // 添加根目录
+            const rootItem = document.createElement('span');
+            rootItem.className = 'webdav-breadcrumb-item' + (path === '/' ? ' active' : '');
+            rootItem.innerHTML = '📁 根目录';
+            rootItem.dataset.path = '/';
+            if (path !== '/') {
+                rootItem.addEventListener('click', () => loadWebdavDirectory('/'));
+            }
+            breadcrumb.appendChild(rootItem);
+            
+            // 解析路径并添加各级目录
+            if (path !== '/') {
+                const parts = path.split('/').filter(p => p);
+                let currentPath = '';
+                
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    currentPath += '/' + part;
+                    
+                    // 添加分隔符
+                    const separator = document.createElement('span');
+                    separator.className = 'webdav-breadcrumb-separator';
+                    separator.textContent = '›';
+                    breadcrumb.appendChild(separator);
+                    
+                    // 添加目录项
+                    const item = document.createElement('span');
+                    const isLast = i === parts.length - 1;
+                    item.className = 'webdav-breadcrumb-item' + (isLast ? ' active' : '');
+                    item.textContent = part;
+                    item.dataset.path = currentPath;
+                    
+                    if (!isLast) {
+                        const pathToLoad = currentPath;
+                        item.addEventListener('click', () => loadWebdavDirectory(pathToLoad));
+                    }
+                    
+                    breadcrumb.appendChild(item);
+                }
+            }
+        }
+
+        // 处理文件/文件夹点击
+        async function handleFileItemClick(item) {
+            if (item.isDirectory) {
+                // 进入文件夹
+                await loadWebdavDirectory(item.path);
+            } else {
+                // 选择txt文件
+                selectTxtFile(item.path);
+            }
+        }
+
+        // 选择txt文件
+        async function selectTxtFile(filePath) {
+            // 填充文件路径
+            document.getElementById('webdavFilePath').value = filePath;
+            
+            // 关闭浏览器
+            closeWebdavBrowser();
+            
+            // 显示选中提示
+            showToast(`已选择文件: ${filePath.split('/').pop()}`, 'success');
+            
+            // 自动获取文件内容
+            await fetchFromWebdav();
+        }
+
+        // ==================== localStorage 配置加载 ====================
+
+        // 加载URL前缀配置
+        function loadUrlPrefixConfig() {
+            const savedPrefix = localStorage.getItem('strm_urlPrefix');
+            if (savedPrefix !== null) {
+                document.getElementById('urlPrefix').value = savedPrefix;
+            }
+        }
+
+        // 加载URL编码开关状态
+        function loadUrlEncodeConfig() {
+            const savedEncode = localStorage.getItem('strm_urlEncode');
+            const toggle = document.getElementById('urlEncodeToggle');
+            const toggleStatus = document.getElementById('toggleStatus');
+            
+            if (savedEncode !== null) {
+                const isChecked = savedEncode === 'true';
+                toggle.checked = isChecked;
+                if (isChecked) {
+                    toggleStatus.textContent = '开启';
+                    toggleStatus.classList.add('active');
+                } else {
+                    toggleStatus.textContent = '关闭';
+                    toggleStatus.classList.remove('active');
+                }
+            }
+        }
+
+        // ==================== 初始化 ====================
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initDropZone();
+            
+            // 加载保存的后缀名配置
+            loadExtensionsFromStorage();
+            renderExtensionTags();
+            
+            // 加载保存的广告关键词配置
+            loadAdKeywordsFromStorage();
+            renderAdKeywordTags();
+            initAdFilterToggle();
+            
+            // 加载排除路径配置
+            loadExcludedPaths();
+            
+            // 加载历史文件列表（用于增量对比）
+            loadPreviousFileList();
+            
+            // 加载保存的 URL 前缀配置
+            loadUrlPrefixConfig();
+            
+            // 加载保存的 URL 编码开关状态
+            loadUrlEncodeConfig();
+            
+            // 加载保存的 WebDAV 配置
+            loadWebdavConfig();
+            
+            // 初始化 WebDAV 自动保存
+            initWebdavAutoSave();
+            
+            // 初始化模态框拖动和缩放功能
+            initModalDrag();
+            initModalResize();
+            
+            // 监听ESC键关闭模态框
+            document.addEventListener('keydown', handleKeyDown);
+        });
+    </script>
+</body>
+</html>
