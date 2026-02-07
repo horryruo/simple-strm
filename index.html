@@ -2358,6 +2358,456 @@
                 margin-left: 16px;
             }
         }
+
+        /* ==================== Tab 系统样式 ==================== */
+        .tab-container {
+            margin-bottom: var(--space-lg);
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: var(--bg-secondary);
+            backdrop-filter: var(--blur-md);
+            -webkit-backdrop-filter: var(--blur-md);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: var(--space-md) var(--space-lg);
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius-lg);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: var(--transition);
+            border-radius: var(--radius-lg);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .tab-btn.active {
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn.active::before {
+            opacity: 1;
+        }
+
+        .tab-btn-icon {
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .tab-nav {
+                padding: var(--space-sm);
+                gap: var(--space-xs);
+            }
+
+            .tab-btn {
+                padding: var(--space-sm) var(--space-md);
+                font-size: 14px;
+                flex-direction: column;
+                gap: var(--space-xs);
+            }
+
+            .tab-btn-icon {
+                font-size: 20px;
+            }
+        }
+
+        /* ==================== 刮削检测相关样式 ==================== */
+        .scrape-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .scrape-stat-item {
+            background: var(--bg-tertiary);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scrape-stat-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .scrape-stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .scrape-stat-item:hover::before {
+            opacity: 0.05;
+        }
+
+        .scrape-stat-item.success {
+            border-left: 4px solid #34c759;
+        }
+
+        .scrape-stat-item.warning {
+            border-left: 4px solid #ff9500;
+        }
+
+        .scrape-stat-item.info {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .scrape-stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+
+        .scrape-stat-item.success .scrape-stat-value {
+            color: #34c759;
+        }
+
+        .scrape-stat-item.warning .scrape-stat-value {
+            color: #ff9500;
+        }
+
+        .scrape-stat-item.info .scrape-stat-value {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .scrape-stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: var(--space-xs);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .scrape-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-top: var(--space-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .scrape-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #34c759 0%, #30d158 100%);
+            border-radius: var(--radius-full);
+            transition: width 0.5s ease;
+        }
+
+        .scrape-progress-text {
+            text-align: center;
+            margin-top: var(--space-sm);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+        }
+
+        .unscraped-list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: var(--radius-lg);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        .unscraped-list {
+            list-style: none;
+        }
+
+        .unscraped-item {
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            transition: var(--transition);
+        }
+
+        .unscraped-item:last-child {
+            border-bottom: none;
+        }
+
+        .unscraped-item:hover {
+            background: var(--accent-soft);
+        }
+
+        .unscraped-item-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .unscraped-item-path {
+            flex: 1;
+            font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
+            font-size: 13px;
+            color: var(--text-tertiary);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        /* 缺失标签样式 */
+        .missing-tags {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .missing-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .missing-nfo {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .missing-image {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        [data-theme="dark"] .missing-nfo {
+            background: rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
+
+        [data-theme="dark"] .missing-image {
+            background: rgba(245, 158, 11, 0.25);
+            color: #fbbf24;
+        }
+
+        .unscraped-search-container {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+
+        .unscraped-search-input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .unscraped-search-input:hover {
+            border-color: var(--border-color-strong);
+        }
+
+        .unscraped-search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+            background: var(--bg-secondary);
+        }
+
+        .unscraped-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .unscraped-actions {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+            flex-wrap: wrap;
+        }
+
+        /* 刮削标识标签样式 */
+        .scrape-indicator-tag-list .tag-item {
+            background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+        }
+
+        .scrape-indicator-tag-list .tag-item:hover {
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
+        }
+
+        /* ==================== 刮削检测导入模式样式 ==================== */
+        .scrape-import-modes {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .scrape-import-option {
+            width: 100%;
+        }
+
+        .scrape-import-btn-group {
+            text-align: center;
+        }
+
+        .scrape-folder-btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 18px 32px;
+            font-size: 16px;
+        }
+
+        .scrape-folder-btn span:first-child {
+            font-size: 20px;
+        }
+
+        .scrape-import-hint {
+            margin-top: var(--space-md);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .scrape-import-divider {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .scrape-import-divider::before,
+        .scrape-import-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        /* 扫描进度样式 */
+        .scrape-scan-progress {
+            padding: var(--space-lg);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            margin-top: var(--space-md);
+        }
+
+        .scrape-scan-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            font-size: 15px;
+            font-weight: 550;
+            color: var(--text-primary);
+        }
+
+        .scrape-scan-status .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-color);
+        }
+
+        .scrape-scan-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .scrape-scan-stats strong {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* 浏览器不支持提示 */
+        .browser-not-supported-hint {
+            padding: var(--space-md);
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.1) 0%, rgba(255, 149, 0, 0.05) 100%);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-md);
+        }
+
+        .browser-not-supported-hint strong {
+            color: #ff9500;
+        }
+
+        @media (max-width: 768px) {
+            .scrape-folder-btn {
+                max-width: 100%;
+            }
+
+            .scrape-scan-stats {
+                flex-direction: column;
+                gap: var(--space-sm);
+                align-items: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2371,6 +2821,23 @@
             <h1>STRM 文件生成器</h1>
             <p class="subtitle">可视化URL拼接与STRM文件批量生成工具</p>
         </header>
+
+        <!-- Tab 导航 -->
+        <div class="tab-container">
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('tab-main')" data-tab="tab-main">
+                    <span class="tab-btn-icon">📄</span>
+                    <span class="tab-btn-text">STRM生成</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('tab-scrape')" data-tab="tab-scrape">
+                    <span class="tab-btn-icon">🔍</span>
+                    <span class="tab-btn-text">刮削检测</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 主标签页：STRM生成 -->
+        <div class="tab-content active" id="tab-main">
 
         <!-- 文件导入模块 -->
         <div class="card">
@@ -2635,6 +3102,148 @@
                 <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
             </div>
         </div>
+
+        </div><!-- 结束主标签页 tab-main -->
+
+        <!-- 刮削检测标签页 -->
+        <div class="tab-content" id="tab-scrape">
+
+        <!-- 文件导入卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">📂</div>
+                <h2 class="card-title">导入媒体目录</h2>
+            </div>
+            
+            <!-- 双模式导入选择 -->
+            <div class="scrape-import-modes">
+                <!-- 方式一：直接选择文件夹（File System Access API） -->
+                <div class="scrape-import-option" id="scrapeImportFolder" style="display: none;">
+                    <div class="scrape-import-btn-group">
+                        <button class="btn btn-primary scrape-folder-btn" onclick="selectScrapeFolder()">
+                            <span>📁</span>
+                            <span>选择文件夹</span>
+                        </button>
+                        <p class="scrape-import-hint">直接选择媒体文件夹，自动扫描所有子目录</p>
+                    </div>
+                </div>
+                
+                <!-- 分隔线 -->
+                <div class="scrape-import-divider" id="scrapeImportDivider" style="display: none;">
+                    <span>或者</span>
+                </div>
+                
+                <!-- 方式二：导入目录树文件 -->
+                <div class="scrape-import-option">
+                    <div class="drop-zone" id="scrapeDropZone">
+                        <div class="drop-zone-icon">📄</div>
+                        <p class="drop-zone-text">拖拽 tree.txt 文件到此处，或点击选择文件</p>
+                        <p class="drop-zone-hint">支持 .txt 格式，自动识别 UTF-16 LE 编码</p>
+                    </div>
+                    <input type="file" class="file-input" id="scrapeFileInput" accept=".txt">
+                </div>
+            </div>
+            
+            <!-- 扫描进度显示 -->
+            <div class="scrape-scan-progress" id="scrapeScanProgress" style="display: none;">
+                <div class="scrape-scan-status">
+                    <div class="spinner"></div>
+                    <span id="scrapeScanStatusText">正在扫描...</span>
+                </div>
+                <div class="scrape-scan-stats">
+                    <span>📁 <strong id="scrapeScanDirCount">0</strong> 个文件夹</span>
+                    <span>📄 <strong id="scrapeScanFileCount">0</strong> 个文件</span>
+                </div>
+            </div>
+            
+            <!-- 文件信息显示 -->
+            <div class="file-info" id="scrapeFileInfo">
+                <span class="file-info-icon">📄</span>
+                <div class="file-info-details">
+                    <div class="file-info-name" id="scrapeFileName">-</div>
+                    <div class="file-info-size" id="scrapeFileSize">-</div>
+                </div>
+                <button class="file-info-remove" onclick="removeScrapeFile()" title="移除文件">✕</button>
+            </div>
+        </div>
+
+        <!-- 刮削标识配置卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">🏷️</div>
+                <h2 class="card-title">刮削标识配置</h2>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">
+                刮削完成条件：目录必须同时包含 NFO 文件和图片文件（poster.jpg、fanart.jpg 等）
+            </p>
+            <div class="tag-input-container">
+                <div class="tag-list scrape-indicator-tag-list" id="scrapeIndicatorTagList">
+                    <!-- 标签将由 JavaScript 动态生成 -->
+                </div>
+                <div class="tag-input-row">
+                    <input type="text" class="tag-input" id="scrapeIndicatorInput" placeholder="输入文件名（如：poster.png）" onkeypress="handleScrapeIndicatorKeypress(event)">
+                    <button class="tag-btn tag-btn-add" onclick="addScrapeIndicator()">添加</button>
+                    <button class="tag-btn tag-btn-reset" onclick="resetScrapeIndicators()">重置为默认</button>
+                </div>
+                <p class="tag-hint">💡 输入完整文件名后按 Enter 或点击"添加"按钮。支持 .nfo、.jpg 等文件</p>
+            </div>
+        </div>
+
+        <!-- 检测结果统计卡片 -->
+        <div class="card" id="scrapeResultCard" style="display: none;">
+            <div class="card-header">
+                <div class="card-icon">📊</div>
+                <h2 class="card-title">检测结果</h2>
+            </div>
+            <div class="scrape-stats">
+                <div class="scrape-stat-item info">
+                    <div class="scrape-stat-value" id="scrapeTotalDirs">0</div>
+                    <div class="scrape-stat-label">媒体目录</div>
+                </div>
+                <div class="scrape-stat-item success">
+                    <div class="scrape-stat-value" id="scrapeScrapedDirs">0</div>
+                    <div class="scrape-stat-label">已刮削</div>
+                </div>
+                <div class="scrape-stat-item warning">
+                    <div class="scrape-stat-value" id="scrapeUnscrapedDirs">0</div>
+                    <div class="scrape-stat-label">未刮削</div>
+                </div>
+            </div>
+            <div class="scrape-progress-bar">
+                <div class="scrape-progress-fill" id="scrapeProgressFill" style="width: 0%"></div>
+            </div>
+            <div class="scrape-progress-text" id="scrapeProgressText">刮削率：0%</div>
+        </div>
+
+        <!-- 未刮削目录列表卡片 -->
+        <div class="card" id="unscrapedListCard" style="display: none;">
+            <div class="card-header">
+                <div class="card-icon">📋</div>
+                <h2 class="card-title">未刮削目录列表</h2>
+            </div>
+            <div class="unscraped-search-container">
+                <input type="text" class="unscraped-search-input" id="unscrapedSearchInput" placeholder="搜索目录路径..." oninput="filterUnscrapedList()">
+            </div>
+            <div class="unscraped-count" id="unscrapedCount">共 0 个未刮削目录</div>
+            <div class="unscraped-list-container" id="unscrapedListContainer">
+                <ul class="unscraped-list" id="unscrapedList">
+                    <!-- 列表将由 JavaScript 动态生成 -->
+                </ul>
+            </div>
+            <div class="unscraped-actions">
+                <button class="btn btn-primary" onclick="copyUnscrapedPaths()">
+                    <span>📋</span>
+                    <span>复制全部路径</span>
+                </button>
+                <button class="btn btn-secondary" onclick="exportUnscrapedTxt()">
+                    <span>💾</span>
+                    <span>导出为 TXT</span>
+                </button>
+            </div>
+        </div>
+
+        </div><!-- 结束刮削检测标签页 tab-scrape -->
+
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
@@ -4842,7 +5451,926 @@
             
             // 监听ESC键关闭模态框
             document.addEventListener('keydown', handleKeyDown);
+
+            // 初始化刮削检测功能
+            initScrapeDetection();
+            
+            // 初始化 Tab 系统
+            initTabs();
         });
+
+        // ==================== Tab 系统功能 ====================
+
+        // 切换 Tab
+        function switchTab(tabId) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有 Tab 按钮的激活状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示目标标签页
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+            
+            // 激活对应的 Tab 按钮
+            const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+            
+            // 保存当前 Tab 状态到 localStorage
+            localStorage.setItem('strm_activeTab', tabId);
+        }
+
+        // 初始化 Tab 系统
+        function initTabs() {
+            // 从 localStorage 恢复标签状态
+            const savedTab = localStorage.getItem('strm_activeTab');
+            if (savedTab) {
+                switchTab(savedTab);
+            }
+        }
+
+        // ==================== 刮削检测功能 ====================
+
+        // 刮削检测全局状态
+        let scrapeParsedData = null;
+        let scrapeMediaDirs = [];
+        let scrapeUnscrapedDirs = [];
+        let scrapeScrapedDirs = [];
+        let allUnscrapedDirs = []; // 用于搜索过滤
+
+        // 默认刮削标识列表
+        const DEFAULT_SCRAPE_INDICATORS = [
+            '.nfo',
+            'poster.jpg',
+            'fanart.jpg',
+            'folder.jpg',
+            'thumb.jpg',
+            'banner.jpg'
+        ];
+
+        // 当前使用的刮削标识列表
+        let currentScrapeIndicators = [...DEFAULT_SCRAPE_INDICATORS];
+
+        // 视频文件扩展名（用于判断媒体目录）
+        const VIDEO_EXTENSIONS = [
+            'mp4', 'mkv', 'avi', 'ts', 'm2ts', 'rmvb', 'rm', 'wmv',
+            'flv', 'mov', 'webm', 'm4v', 'mpeg', 'mpg', '3gp', '3g2',
+            'iso', 'bdmv'
+        ];
+
+        // 初始化刮削检测功能
+        function initScrapeDetection() {
+            // 初始化拖拽区域
+            initScrapeDropZone();
+            
+            // 加载保存的刮削标识配置
+            loadScrapeIndicatorsFromStorage();
+            renderScrapeIndicatorTags();
+            
+            // 初始化 File System Access API 支持
+            initFileSystemAccessUI();
+        }
+
+        // ==================== File System Access API 支持 ====================
+
+        // 检查浏览器是否支持 File System Access API
+        function isFileSystemAccessSupported() {
+            return 'showDirectoryPicker' in window;
+        }
+
+        // 初始化 File System Access UI
+        function initFileSystemAccessUI() {
+            const folderOption = document.getElementById('scrapeImportFolder');
+            const divider = document.getElementById('scrapeImportDivider');
+            
+            if (!folderOption || !divider) return;
+            
+            if (isFileSystemAccessSupported()) {
+                // 浏览器支持，显示文件夹选择按钮
+                folderOption.style.display = 'block';
+                divider.style.display = 'flex';
+            } else {
+                // 浏览器不支持，保持隐藏并可选显示提示
+                folderOption.style.display = 'none';
+                divider.style.display = 'none';
+            }
+        }
+
+        // 选择文件夹进行刮削检测
+        async function selectScrapeFolder() {
+            if (!isFileSystemAccessSupported()) {
+                showToast('您的浏览器不支持文件夹选择功能，请使用 Chrome 或 Edge 浏览器', 'error');
+                return;
+            }
+            
+            try {
+                // 调用 File System Access API 选择文件夹
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read'
+                });
+                
+                // 显示扫描进度
+                showScrapeScanProgress();
+                
+                // 遍历目录
+                const files = [];
+                let dirCount = 0;
+                let fileCount = 0;
+                
+                await traverseScrapeDirectory(dirHandle, '', files, (dirs, filesScanned) => {
+                    dirCount = dirs;
+                    fileCount = filesScanned;
+                    updateScrapeScanStats(dirs, filesScanned);
+                });
+                
+                // 隐藏扫描进度
+                hideScrapeScanProgress();
+                
+                // 显示文件信息
+                const folderName = dirHandle.name;
+                document.getElementById('scrapeFileName').textContent = `📁 ${folderName}`;
+                document.getElementById('scrapeFileSize').textContent = `${dirCount} 个文件夹, ${fileCount} 个文件`;
+                document.getElementById('scrapeFileInfo').classList.add('visible');
+                document.getElementById('scrapeFileInfo').querySelector('.file-info-icon').textContent = '📁';
+                
+                // 处理扫描结果
+                processScrapeFromFileSystem(files, folderName);
+                
+                showToast(`扫描完成：${dirCount} 个文件夹, ${fileCount} 个文件`, 'success');
+                
+            } catch (err) {
+                hideScrapeScanProgress();
+                
+                if (err.name === 'AbortError') {
+                    // 用户取消选择，静默处理
+                    return;
+                } else if (err.name === 'SecurityError' || err.name === 'NotAllowedError') {
+                    showToast('无法访问文件夹：权限被拒绝', 'error');
+                } else {
+                    console.error('选择文件夹错误:', err);
+                    showToast('无法访问文件夹: ' + err.message, 'error');
+                }
+            }
+        }
+
+        // 递归遍历目录
+        async function traverseScrapeDirectory(dirHandle, currentPath, files, onProgress) {
+            let dirCount = 0;
+            let fileCount = 0;
+            
+            async function traverse(handle, path) {
+                try {
+                    for await (const entry of handle.values()) {
+                        const entryPath = path ? `${path}/${entry.name}` : entry.name;
+                        
+                        if (entry.kind === 'file') {
+                            files.push({
+                                type: 'file',
+                                name: entry.name,
+                                path: entryPath
+                            });
+                            fileCount++;
+                        } else if (entry.kind === 'directory') {
+                            files.push({
+                                type: 'directory',
+                                name: entry.name,
+                                path: entryPath
+                            });
+                            dirCount++;
+                            
+                            // 更新进度
+                            if (onProgress) {
+                                onProgress(dirCount, fileCount);
+                            }
+                            
+                            // 递归遍历子目录
+                            await traverse(entry, entryPath);
+                        }
+                    }
+                } catch (err) {
+                    // 某些目录可能无法访问，跳过并继续
+                    console.warn(`无法访问目录 ${path}:`, err);
+                }
+            }
+            
+            await traverse(dirHandle, currentPath);
+            
+            // 最终更新进度
+            if (onProgress) {
+                onProgress(dirCount, fileCount);
+            }
+            
+            return { dirCount, fileCount };
+        }
+
+        // 显示扫描进度
+        function showScrapeScanProgress() {
+            const progressEl = document.getElementById('scrapeScanProgress');
+            if (progressEl) {
+                progressEl.style.display = 'block';
+                document.getElementById('scrapeScanStatusText').textContent = '正在扫描...';
+                document.getElementById('scrapeScanDirCount').textContent = '0';
+                document.getElementById('scrapeScanFileCount').textContent = '0';
+            }
+        }
+
+        // 隐藏扫描进度
+        function hideScrapeScanProgress() {
+            const progressEl = document.getElementById('scrapeScanProgress');
+            if (progressEl) {
+                progressEl.style.display = 'none';
+            }
+        }
+
+        // 更新扫描统计
+        function updateScrapeScanStats(dirCount, fileCount) {
+            document.getElementById('scrapeScanDirCount').textContent = dirCount;
+            document.getElementById('scrapeScanFileCount').textContent = fileCount;
+        }
+
+        // 从 File System Access API 结果处理刮削检测
+        function processScrapeFromFileSystem(files, rootFolderName) {
+            // 构建与 parseScrapeDirectoryTree 相同格式的数据结构
+            const root = { name: rootFolderName, type: 'folder', children: [], path: [rootFolderName] };
+            
+            // 创建路径到节点的映射
+            const pathToNode = new Map();
+            pathToNode.set('', root);
+            
+            // 按路径深度排序，确保父目录先被处理
+            files.sort((a, b) => {
+                const depthA = a.path.split('/').length;
+                const depthB = b.path.split('/').length;
+                return depthA - depthB;
+            });
+            
+            // 构建树形结构
+            for (const file of files) {
+                const pathParts = file.path.split('/');
+                const name = pathParts[pathParts.length - 1];
+                const parentPath = pathParts.slice(0, -1).join('/');
+                
+                // 找到父节点
+                let parentNode = pathToNode.get(parentPath);
+                if (!parentNode) {
+                    // 如果父节点不存在，从根节点开始创建
+                    parentNode = root;
+                }
+                
+                // 创建节点
+                const node = {
+                    name: name,
+                    type: file.type === 'directory' ? 'folder' : 'file',
+                    path: [rootFolderName, ...pathParts]
+                };
+                
+                if (file.type === 'directory') {
+                    node.children = [];
+                    pathToNode.set(file.path, node);
+                }
+                
+                // 添加到父节点
+                if (parentNode.children) {
+                    parentNode.children.push(node);
+                }
+            }
+            
+            // 保存解析结果
+            scrapeParsedData = root;
+            
+            // 检测刮削状态
+            detectScrapeStatus();
+        }
+
+        // 初始化刮削检测拖拽区域
+        function initScrapeDropZone() {
+            const dropZone = document.getElementById('scrapeDropZone');
+            const fileInput = document.getElementById('scrapeFileInput');
+
+            if (!dropZone || !fileInput) return;
+
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleScrapeFile(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleScrapeFile(e.target.files[0]);
+                }
+            });
+        }
+
+        // 读取刮削检测文件内容（支持 GBK/GB2312 编码）
+        async function readScrapeFileContent(file) {
+            const buffer = await file.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            
+            // UTF-8 BOM
+            if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+                console.log('检测到 UTF-8 BOM 编码');
+                return new TextDecoder('utf-8').decode(buffer);
+            }
+            // UTF-16 LE BOM
+            if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
+                console.log('检测到 UTF-16 LE 编码');
+                return new TextDecoder('utf-16le').decode(buffer);
+            }
+            // UTF-16 BE BOM
+            if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
+                console.log('检测到 UTF-16 BE 编码');
+                return new TextDecoder('utf-16be').decode(buffer);
+            }
+            
+            // 无 BOM，尝试 UTF-8，如果有乱码则尝试 GBK
+            let text = new TextDecoder('utf-8').decode(buffer);
+            
+            // 检查是否有替换字符（乱码标志）或者首字符是高位字节
+            if (text.includes('\uFFFD') || /[\x80-\xFF]/.test(text.charAt(0))) {
+                console.log('检测到可能是 GBK/GB2312 编码，尝试 GBK 解码');
+                // 尝试 GBK 编码
+                try {
+                    text = new TextDecoder('gbk').decode(buffer);
+                    console.log('使用 GBK 解码成功');
+                } catch (e) {
+                    console.warn('GBK 解码失败，尝试 gb18030');
+                    // 如果 GBK 解码器不可用，尝试使用 gb18030
+                    try {
+                        text = new TextDecoder('gb18030').decode(buffer);
+                        console.log('使用 GB18030 解码成功');
+                    } catch (e2) {
+                        console.warn('GB18030 解码失败，使用 UTF-8');
+                    }
+                }
+            } else {
+                console.log('使用 UTF-8 编码');
+            }
+            
+            return text;
+        }
+
+        // 处理刮削检测文件
+        async function handleScrapeFile(file) {
+            console.log('handleScrapeFile() 被调用，文件:', file.name);
+            
+            if (!file.name.endsWith('.txt')) {
+                showToast('请选择 .txt 格式的文件', 'error');
+                return;
+            }
+
+            // 显示文件信息
+            document.getElementById('scrapeFileName').textContent = file.name;
+            document.getElementById('scrapeFileSize').textContent = formatFileSize(file.size);
+            document.getElementById('scrapeFileInfo').classList.add('visible');
+
+            try {
+                // 使用支持 GBK 的文件读取函数
+                const content = await readScrapeFileContent(file);
+                console.log('文件内容长度:', content.length, '字符');
+                console.log('文件内容前500字符:', content.substring(0, 500));
+                parseScrapeDirectoryTree(content);
+                showToast('文件解析成功，开始检测刮削状态', 'success');
+            } catch (error) {
+                console.error('解析错误:', error);
+                showToast('文件解析失败: ' + error.message, 'error');
+            }
+        }
+
+        // 移除刮削检测文件
+        function removeScrapeFile() {
+            document.getElementById('scrapeFileInfo').classList.remove('visible');
+            document.getElementById('scrapeFileInput').value = '';
+            document.getElementById('scrapeResultCard').style.display = 'none';
+            document.getElementById('unscrapedListCard').style.display = 'none';
+            scrapeParsedData = null;
+            scrapeMediaDirs = [];
+            scrapeUnscrapedDirs = [];
+            scrapeScrapedDirs = [];
+            allUnscrapedDirs = [];
+        }
+
+        // 解析目录树并检测刮削状态（支持 tree /a 和 tree /f 格式）
+        function parseScrapeDirectoryTree(content) {
+            console.log('parseScrapeDirectoryTree() 被调用');
+            
+            const lines = content.split(/\r?\n/);
+            console.log('原始行数:', lines.length);
+            
+            const root = { name: 'root', type: 'folder', children: [], path: [] };
+            const stack = [{ node: root, level: -1 }];
+            
+            let folderCount = 0;
+            let fileCount = 0;
+            let debugFileCount = 0; // 用于调试输出
+            
+            for (const line of lines) {
+                // 跳过空行
+                if (!line.trim()) continue;
+                
+                // 跳过 Windows tree 命令的标题行
+                // 例如：卷 xxx 的文件夹 PATH 列表、卷的序列号是 xxx
+                if (line.includes('卷的序列号') || line.includes('的文件夹 PATH 列表')) {
+                    console.log('跳过标题行:', line);
+                    continue;
+                }
+                
+                // 跳过根目录行，如 "F:." 或 "C:\." 或 "F:" 等
+                if (/^[A-Z]:\\?\.?$/i.test(line.trim())) {
+                    console.log('跳过根目录行:', line);
+                    continue;
+                }
+                
+                let level = 0;
+                let name = '';
+                let isFile = false;
+                
+                // 检测行类型：
+                // 1. 文件夹行：包含 +--- 或 \---
+                // 2. 文件行：只有 | 和空格，然后是文件名（用户的 tree 格式）
+                // 3. Unicode 格式：├── 或 └──
+                
+                // 格式1: tree /a 文件夹行 - 包含 +--- 或 \---
+                const folderMatch = line.match(/^([\s|]*)[+\\]---\s*(.+)$/);
+                if (folderMatch) {
+                    const prefix = folderMatch[1];
+                    name = folderMatch[2].trim();
+                    // 计算层级：每个 | 后面跟着空格代表一层
+                    // 例如: "|   |   +---" 中有2个 |，所以是第2层
+                    level = (prefix.match(/\|/g) || []).length;
+                    isFile = false;
+                    
+                    // 但也要检查名称是否有扩展名（有些情况下文件也会用 +--- 格式）
+                    if (/\.[a-zA-Z0-9]+$/.test(name)) {
+                        isFile = true;
+                    }
+                } else {
+                    // 格式2: Unicode 格式 - ├── 或 └──
+                    const unicodeMatch = line.match(/^([\s│]*)[├└]──\s*(.+)$/);
+                    if (unicodeMatch) {
+                        const prefix = unicodeMatch[1];
+                        name = unicodeMatch[2].trim();
+                        // 计算层级
+                        level = (prefix.match(/│/g) || []).length;
+                        isFile = /\.[a-zA-Z0-9]+$/.test(name);
+                    } else {
+                        // 格式3: 文件行 - 只有 | 和空格的组合，然后是文件名
+                        // 例如: "|   |       filename.ext"
+                        // 匹配模式：以 | 和空格开头，然后是连续空格，最后是文件名
+                        const fileMatch = line.match(/^([\s|]+)\s{2,}([^\s|][^\r\n]*)$/);
+                        if (fileMatch) {
+                            const prefix = fileMatch[1];
+                            const potentialName = fileMatch[2].trim();
+                            
+                            // 检查是否有扩展名（确认是文件）
+                            if (/\.[a-zA-Z0-9]+$/.test(potentialName)) {
+                                name = potentialName;
+                                // 计算层级：统计 | 的数量
+                                level = (prefix.match(/\|/g) || []).length;
+                                isFile = true;
+                                
+                                // 调试：输出前10个解析到的文件
+                                if (debugFileCount < 10) {
+                                    console.log(`解析到文件: "${name}", 层级: ${level}, 行内容: "${line.substring(0, 80)}"`);
+                                    debugFileCount++;
+                                }
+                            }
+                        } else {
+                            // 格式4: 旧格式 - 使用 |-
+                            const oldMatch = line.match(/\|-\s*(.+)$/);
+                            if (oldMatch) {
+                                name = oldMatch[1].trim();
+                                level = (line.match(/\|/g) || []).length;
+                                isFile = /\.[a-zA-Z0-9]+$/.test(name);
+                            }
+                        }
+                    }
+                }
+                
+                if (!name) continue;
+                
+                const node = {
+                    name: name,
+                    type: isFile ? 'file' : 'folder',
+                    children: isFile ? undefined : [],
+                    path: []
+                };
+
+                // 找到正确的父节点
+                while (stack.length > 1 && stack[stack.length - 1].level >= level) {
+                    stack.pop();
+                }
+
+                const parent = stack[stack.length - 1].node;
+                node.path = [...(parent.path || []), name];
+                
+                if (parent.children) {
+                    parent.children.push(node);
+                }
+
+                if (!isFile) {
+                    stack.push({ node, level });
+                    folderCount++;
+                } else {
+                    fileCount++;
+                }
+            }
+
+            scrapeParsedData = root;
+            
+            console.log('解析完成: 文件夹数量:', folderCount, ', 文件数量:', fileCount);
+            console.log('根节点子节点数量:', root.children.length);
+            if (root.children.length > 0) {
+                console.log('第一个子节点:', root.children[0]);
+            }
+
+            // 检测刮削状态
+            detectScrapeStatus();
+        }
+
+        // 检测刮削状态
+        function detectScrapeStatus() {
+            console.log('detectScrapeStatus() 被调用');
+            console.log('scrapeParsedData:', scrapeParsedData);
+            
+            scrapeMediaDirs = [];
+            scrapeUnscrapedDirs = [];
+            scrapeScrapedDirs = [];
+
+            let traverseCount = 0;
+
+            // 遍历目录树，找出媒体目录并检测刮削状态
+            function traverseAndDetect(node) {
+                traverseCount++;
+                
+                if (node.type === 'folder' && node.children) {
+                    // 新规则：检查该目录是否为媒体目录（包含 .strm 文件）
+                    const hasStrmFile = node.children.some(child => {
+                        if (child.type === 'file') {
+                            const isStrm = child.name.toLowerCase().endsWith('.strm');
+                            if (isStrm) {
+                                console.log('发现 STRM 文件:', child.name);
+                            }
+                            return isStrm;
+                        }
+                        return false;
+                    });
+
+                    if (hasStrmFile) {
+                        // 这是一个媒体目录（包含 .strm 文件）
+                        const dirPath = node.path.join('/');
+                        console.log('发现媒体目录（含 .strm）:', dirPath);
+                        scrapeMediaDirs.push(dirPath);
+
+                        // 检查是否已刮削（新规则：必须同时有 NFO 和图片）
+                        const scrapeResult = checkIfScraped(node);
+                        console.log(`目录: ${dirPath}, 有strm: true, 有nfo: ${scrapeResult.hasNfo}, 有图片: ${scrapeResult.hasImage}, 已刮削: ${scrapeResult.isScraped}`);
+                        if (scrapeResult.isScraped) {
+                            scrapeScrapedDirs.push(dirPath);
+                        } else {
+                            // 存储对象包含路径和缺失状态
+                            scrapeUnscrapedDirs.push({
+                                path: dirPath,
+                                hasNfo: scrapeResult.hasNfo,
+                                hasImage: scrapeResult.hasImage
+                            });
+                        }
+                    }
+
+                    // 递归处理子目录
+                    for (const child of node.children) {
+                        if (child.type === 'folder') {
+                            traverseAndDetect(child);
+                        }
+                    }
+                }
+            }
+
+            traverseAndDetect(scrapeParsedData);
+            
+            console.log('遍历完成，共遍历节点数:', traverseCount);
+            console.log('媒体目录总数:', scrapeMediaDirs.length);
+            console.log('已刮削目录数:', scrapeScrapedDirs.length);
+            console.log('未刮削目录数:', scrapeUnscrapedDirs.length);
+
+            // 保存完整列表用于搜索过滤
+            allUnscrapedDirs = [...scrapeUnscrapedDirs];
+
+            // 更新UI
+            updateScrapeResultsUI();
+        }
+
+        // 检查目录是否已刮削（新规则：必须同时有 NFO 和图片）
+        function checkIfScraped(dirNode) {
+            if (!dirNode.children) return { isScraped: false, hasNfo: false, hasImage: false };
+
+            let hasNfo = false;
+            let hasImage = false;
+            
+            // 图片标识列表
+            const IMAGE_INDICATORS = [
+                'poster.jpg', 'poster.png',
+                'fanart.jpg', 'fanart.png',
+                'folder.jpg', 'folder.png',
+                'thumb.jpg', 'thumb.png',
+                'banner.jpg', 'banner.png'
+            ];
+
+            for (const child of dirNode.children) {
+                if (child.type !== 'file') continue;
+                
+                const fileName = child.name.toLowerCase();
+                
+                // 检查 NFO 文件
+                if (fileName.endsWith('.nfo')) {
+                    hasNfo = true;
+                }
+                
+                // 检查图片文件
+                for (const indicator of IMAGE_INDICATORS) {
+                    if (fileName.includes(indicator) || fileName.endsWith(indicator)) {
+                        hasImage = true;
+                        break;
+                    }
+                }
+                
+                // 两者都有，已刮削，可以提前返回
+                if (hasNfo && hasImage) {
+                    return { isScraped: true, hasNfo: true, hasImage: true };
+                }
+            }
+            
+            // 必须同时有 NFO 和图片才算已刮削
+            return { isScraped: hasNfo && hasImage, hasNfo, hasImage };
+        }
+
+        // 更新刮削检测结果UI
+        function updateScrapeResultsUI() {
+            console.log('updateScrapeResultsUI() 被调用');
+            
+            const totalDirs = scrapeMediaDirs.length;
+            const scrapedCount = scrapeScrapedDirs.length;
+            const unscrapedCount = scrapeUnscrapedDirs.length;
+            const scrapeRate = totalDirs > 0 ? Math.round((scrapedCount / totalDirs) * 100) : 0;
+
+            console.log('统计数据: 总媒体目录:', totalDirs, '已刮削:', scrapedCount, '未刮削:', unscrapedCount, '刮削率:', scrapeRate + '%');
+
+            // 显示结果卡片
+            const resultCard = document.getElementById('scrapeResultCard');
+            console.log('scrapeResultCard 元素:', resultCard);
+            resultCard.style.display = 'block';
+
+            // 更新统计数字
+            const totalEl = document.getElementById('scrapeTotalDirs');
+            const scrapedEl = document.getElementById('scrapeScrapedDirs');
+            const unscrapedEl = document.getElementById('scrapeUnscrapedDirs');
+            console.log('统计元素: totalEl=', totalEl, 'scrapedEl=', scrapedEl, 'unscrapedEl=', unscrapedEl);
+            
+            totalEl.textContent = totalDirs;
+            scrapedEl.textContent = scrapedCount;
+            unscrapedEl.textContent = unscrapedCount;
+
+            // 更新进度条
+            document.getElementById('scrapeProgressFill').style.width = `${scrapeRate}%`;
+            document.getElementById('scrapeProgressText').textContent = `刮削率：${scrapeRate}%`;
+
+            // 显示未刮削列表卡片
+            console.log('未刮削目录数量:', unscrapedCount);
+            if (unscrapedCount > 0) {
+                document.getElementById('unscrapedListCard').style.display = 'block';
+                console.log('调用 renderUnscrapedList(), 传入目录数:', scrapeUnscrapedDirs.length);
+                renderUnscrapedList(scrapeUnscrapedDirs);
+            } else {
+                document.getElementById('unscrapedListCard').style.display = 'none';
+                console.log('没有未刮削目录，隐藏列表卡片');
+            }
+        }
+
+        // 渲染未刮削目录列表
+        function renderUnscrapedList(dirs) {
+            console.log('renderUnscrapedList() 被调用，传入目录数:', dirs.length);
+            
+            const listEl = document.getElementById('unscrapedList');
+            console.log('unscrapedList 元素:', listEl);
+            listEl.innerHTML = '';
+
+            for (const item of dirs) {
+                // 兼容旧格式（字符串）和新格式（对象）
+                const dirPath = typeof item === 'string' ? item : item.path;
+                const hasNfo = typeof item === 'object' ? item.hasNfo : true;
+                const hasImage = typeof item === 'object' ? item.hasImage : true;
+                
+                // 生成缺失标签
+                let missingTags = [];
+                if (!hasNfo) {
+                    missingTags.push('<span class="missing-tag missing-nfo">缺少 NFO</span>');
+                }
+                if (!hasImage) {
+                    missingTags.push('<span class="missing-tag missing-image">缺少图片</span>');
+                }
+                
+                const li = document.createElement('li');
+                li.className = 'unscraped-item';
+                li.innerHTML = `
+                    <span class="unscraped-item-icon">📁</span>
+                    <span class="unscraped-item-path">${escapeHtml(dirPath)}</span>
+                    <div class="missing-tags">${missingTags.join('')}</div>
+                `;
+                listEl.appendChild(li);
+            }
+
+            document.getElementById('unscrapedCount').textContent = `共 ${dirs.length} 个未刮削目录`;
+            console.log('未刮削目录列表渲染完成');
+        }
+
+        // 搜索过滤未刮削列表
+        function filterUnscrapedList() {
+            const searchTerm = document.getElementById('unscrapedSearchInput').value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                renderUnscrapedList(allUnscrapedDirs);
+                return;
+            }
+
+            const filteredDirs = allUnscrapedDirs.filter(item => {
+                // 兼容新格式（对象）和旧格式（字符串）
+                const dirPath = typeof item === 'string' ? item : item.path;
+                return dirPath.toLowerCase().includes(searchTerm);
+            });
+            
+            renderUnscrapedList(filteredDirs);
+        }
+
+        // 复制未刮削路径到剪贴板
+        function copyUnscrapedPaths() {
+            if (allUnscrapedDirs.length === 0) {
+                showToast('没有可复制的路径', 'error');
+                return;
+            }
+
+            // 兼容新格式（对象）和旧格式（字符串）
+            const text = allUnscrapedDirs.map(item => {
+                const dirPath = typeof item === 'string' ? item : item.path;
+                return dirPath;
+            }).join('\n');
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`已复制 ${allUnscrapedDirs.length} 个路径到剪贴板`, 'success');
+            }).catch(() => {
+                showToast('复制失败，请手动复制', 'error');
+            });
+        }
+
+        // 导出未刮削路径为 TXT 文件
+        function exportUnscrapedTxt() {
+            if (allUnscrapedDirs.length === 0) {
+                showToast('没有可导出的路径', 'error');
+                return;
+            }
+
+            // 导出时包含缺失信息
+            const text = allUnscrapedDirs.map(item => {
+                // 兼容新格式（对象）和旧格式（字符串）
+                if (typeof item === 'string') {
+                    return item;
+                }
+                
+                let missing = [];
+                if (!item.hasNfo) missing.push('缺少NFO');
+                if (!item.hasImage) missing.push('缺少图片');
+                return `${item.path}\t[${missing.join(', ')}]`;
+            }).join('\n');
+            
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            saveAs(blob, `unscraped_dirs_${timestamp}.txt`);
+            showToast(`已导出 ${allUnscrapedDirs.length} 个路径`, 'success');
+        }
+
+        // ==================== 刮削标识管理功能 ====================
+
+        // 渲染刮削标识标签列表
+        function renderScrapeIndicatorTags() {
+            const container = document.getElementById('scrapeIndicatorTagList');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            for (const indicator of currentScrapeIndicators) {
+                const tag = document.createElement('span');
+                tag.className = 'tag-item';
+                tag.innerHTML = `
+                    ${escapeHtml(indicator)}
+                    <button class="tag-item-remove" onclick="removeScrapeIndicator('${escapeHtml(indicator).replace(/'/g, "\\'")}')">×</button>
+                `;
+                container.appendChild(tag);
+            }
+        }
+
+        // 添加刮削标识
+        function addScrapeIndicator() {
+            const input = document.getElementById('scrapeIndicatorInput');
+            const indicator = input.value.trim();
+            
+            if (!indicator) {
+                showToast('请输入文件名', 'error');
+                return;
+            }
+            
+            if (currentScrapeIndicators.some(i => i.toLowerCase() === indicator.toLowerCase())) {
+                showToast('该标识已存在', 'error');
+                return;
+            }
+            
+            currentScrapeIndicators.push(indicator);
+            saveScrapeIndicatorsToStorage();
+            renderScrapeIndicatorTags();
+            input.value = '';
+            showToast(`已添加刮削标识: ${indicator}`, 'success');
+            
+            // 如果有已解析的数据，重新检测
+            if (scrapeParsedData) {
+                detectScrapeStatus();
+            }
+        }
+
+        // 删除刮削标识
+        function removeScrapeIndicator(indicator) {
+            const index = currentScrapeIndicators.findIndex(i => i === indicator);
+            if (index > -1) {
+                currentScrapeIndicators.splice(index, 1);
+                saveScrapeIndicatorsToStorage();
+                renderScrapeIndicatorTags();
+                showToast(`已删除刮削标识: ${indicator}`, 'info');
+                
+                // 如果有已解析的数据，重新检测
+                if (scrapeParsedData) {
+                    detectScrapeStatus();
+                }
+            }
+        }
+
+        // 重置为默认刮削标识
+        function resetScrapeIndicators() {
+            currentScrapeIndicators = [...DEFAULT_SCRAPE_INDICATORS];
+            saveScrapeIndicatorsToStorage();
+            renderScrapeIndicatorTags();
+            showToast('已重置为默认刮削标识列表', 'success');
+            
+            // 如果有已解析的数据，重新检测
+            if (scrapeParsedData) {
+                detectScrapeStatus();
+            }
+        }
+
+        // 处理回车键添加刮削标识
+        function handleScrapeIndicatorKeypress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addScrapeIndicator();
+            }
+        }
+
+        // 保存刮削标识到 localStorage
+        function saveScrapeIndicatorsToStorage() {
+            localStorage.setItem('strmScrapeIndicators', JSON.stringify(currentScrapeIndicators));
+        }
+
+        // 从 localStorage 加载刮削标识
+        function loadScrapeIndicatorsFromStorage() {
+            const saved = localStorage.getItem('strmScrapeIndicators');
+            if (saved) {
+                try {
+                    currentScrapeIndicators = JSON.parse(saved);
+                } catch (e) {
+                    currentScrapeIndicators = [...DEFAULT_SCRAPE_INDICATORS];
+                }
+            }
+        }
     </script>
 </body>
 </html>
+
