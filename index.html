@@ -2580,8 +2580,9 @@
             padding: var(--space-md) var(--space-lg);
             border-bottom: 1px solid var(--border-color);
             display: flex;
-            align-items: center;
-            gap: var(--space-md);
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: var(--space-sm);
             transition: var(--transition);
         }
 
@@ -2600,11 +2601,14 @@
 
         .unscraped-item-path {
             flex: 1;
+            min-width: 0;
             font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
             font-size: 13px;
             color: var(--text-tertiary);
             word-break: break-all;
+            white-space: normal;
             line-height: 1.5;
+            overflow-wrap: break-word;
         }
 
         /* 缺失标签样式 */
@@ -2806,6 +2810,343 @@
                 flex-direction: column;
                 gap: var(--space-sm);
                 align-items: center;
+            }
+        }
+
+        /* ==================== STRM 文件复制功能样式 ==================== */
+        .scrape-copy-section {
+            margin-top: var(--space-xl);
+            padding-top: var(--space-lg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .scrape-copy-divider {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .scrape-copy-divider::before,
+        .scrape-copy-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .scrape-copy-hint {
+            padding: var(--space-md);
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(0, 122, 255, 0.04) 100%);
+            border: 1px solid rgba(0, 122, 255, 0.15);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+        }
+
+        .scrape-copy-hint p {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .scrape-copy-actions {
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .scrape-copy-progress {
+            margin-top: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .scrape-copy-progress-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            font-size: 15px;
+            font-weight: 550;
+            color: var(--text-primary);
+        }
+
+        .scrape-copy-progress-status .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-color);
+        }
+
+        .scrape-copy-progress-stats {
+            text-align: center;
+            margin-top: var(--space-md);
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .scrape-copy-progress-stats strong {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .scrape-copy-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+        }
+
+        .scrape-copy-result-success {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.12) 0%, rgba(52, 199, 89, 0.06) 100%);
+            border: 1px solid rgba(52, 199, 89, 0.25);
+            border-radius: var(--radius-md);
+            color: #34c759;
+            font-weight: 600;
+        }
+
+        .scrape-copy-result-icon {
+            font-size: 20px;
+        }
+
+        .browser-not-supported-warning {
+            padding: var(--space-md);
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.1) 0%, rgba(255, 149, 0, 0.05) 100%);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-top: var(--space-md);
+            text-align: center;
+        }
+
+        .browser-not-supported-warning strong {
+            color: #ff9500;
+        }
+
+        /* ==================== 改进的复制结果显示样式 ==================== */
+        .copy-result-summary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.12) 0%, rgba(52, 199, 89, 0.06) 100%);
+            border: 1px solid rgba(52, 199, 89, 0.25);
+            border-radius: var(--radius-md);
+            color: #34c759;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+        }
+
+        .copy-result-summary.has-errors {
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.12) 0%, rgba(255, 149, 0, 0.06) 100%);
+            border: 1px solid rgba(255, 149, 0, 0.25);
+            color: #ff9500;
+        }
+
+        .copy-failed-section {
+            margin-bottom: var(--space-md);
+        }
+
+        .copy-failed-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ef4444;
+            margin-bottom: var(--space-sm);
+        }
+
+        .failed-list {
+            list-style: none;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .failed-list li {
+            padding: var(--space-xs) 0;
+            font-size: 13px;
+            font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
+            border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+            word-break: break-all;
+        }
+
+        .failed-list li:last-child {
+            border-bottom: none;
+        }
+
+        .failed-list .error-reason {
+            color: #f87171;
+            font-style: italic;
+            margin-left: var(--space-sm);
+        }
+
+        .copy-success-section {
+            margin-top: var(--space-md);
+        }
+
+        .copy-success-section summary {
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #22c55e;
+            padding: var(--space-sm);
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: var(--radius-sm);
+            user-select: none;
+        }
+
+        .copy-success-section summary:hover {
+            background: rgba(34, 197, 94, 0.15);
+        }
+
+        .success-list {
+            list-style: none;
+            color: #22c55e;
+            padding: var(--space-md);
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            margin-top: 0;
+        }
+
+        .success-list li {
+            padding: var(--space-xs) 0;
+            font-size: 13px;
+            font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+            word-break: break-all;
+        }
+
+        .success-list li:last-child {
+            border-bottom: none;
+        }
+
+        [data-theme="dark"] .copy-result-summary {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.2) 0%, rgba(52, 199, 89, 0.1) 100%);
+        }
+
+        [data-theme="dark"] .copy-result-summary.has-errors {
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.2) 0%, rgba(255, 149, 0, 0.1) 100%);
+        }
+
+        [data-theme="dark"] .failed-list {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        [data-theme="dark"] .success-list {
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        /* ==================== 目录选择器样式 ==================== */
+        .directory-selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .directory-selector {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .directory-selector-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 80px;
+        }
+
+        .directory-selector-name {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-family: 'SF Mono', 'Fira Code', Menlo, Monaco, monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .directory-selector-name.selected {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .directory-selector-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1.5px solid var(--border-color-strong);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .directory-selector-btn:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .directory-selector-btn.selected {
+            background: rgba(52, 199, 89, 0.1);
+            border-color: #34c759;
+            color: #34c759;
+        }
+
+        .start-copy-btn {
+            width: 100%;
+            padding: 14px 28px;
+            font-size: 15px;
+        }
+
+        .start-copy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .directory-selector {
+                flex-direction: column;
+                align-items: stretch;
+                gap: var(--space-sm);
+            }
+
+            .directory-selector-label {
+                min-width: auto;
+            }
+
+            .directory-selector-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -3239,6 +3580,58 @@
                     <span>💾</span>
                     <span>导出为 TXT</span>
                 </button>
+            </div>
+            
+            <!-- STRM 文件复制功能 -->
+            <div class="scrape-copy-section" id="scrapeCopySection" style="display: none;">
+                <div class="scrape-copy-divider">
+                    <span>STRM 文件批量复制</span>
+                </div>
+                <div class="scrape-copy-hint">
+                    <p>📋 将未刮削目录中的 STRM 文件复制到目标文件夹，保持原目录结构，方便批量刮削后再复制回来。</p>
+                </div>
+                
+                <!-- 目录选择器 -->
+                <div class="directory-selector-group">
+                    <div class="directory-selector">
+                        <span class="directory-selector-label">源目录：</span>
+                        <span class="directory-selector-name" id="srcDirName">未选择</span>
+                        <button class="directory-selector-btn" id="selectSrcDirBtn" onclick="selectSrcDirectory()">
+                            <span>📁</span>
+                            <span>选择目录</span>
+                        </button>
+                    </div>
+                    <div class="directory-selector">
+                        <span class="directory-selector-label">目标目录：</span>
+                        <span class="directory-selector-name" id="destDirName">未选择</span>
+                        <button class="directory-selector-btn" id="selectDestDirBtn" onclick="selectDestDirectory()">
+                            <span>📁</span>
+                            <span>选择目录</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="scrape-copy-actions">
+                    <button class="btn btn-primary start-copy-btn" onclick="startStrmCopy()" id="startCopyBtn" disabled>
+                        <span>📂</span>
+                        <span>开始复制</span>
+                    </button>
+                </div>
+                <div class="scrape-copy-progress" id="scrapeCopyProgress" style="display: none;">
+                    <div class="scrape-copy-progress-status">
+                        <div class="spinner"></div>
+                        <span id="scrapeCopyStatusText">正在复制...</span>
+                    </div>
+                    <div class="progress-bar visible">
+                        <div class="progress-bar-fill" id="scrapeCopyProgressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="scrape-copy-progress-stats">
+                        <span>已复制: <strong id="scrapeCopyCount">0</strong> / <strong id="scrapeCopyTotal">0</strong> 个文件</span>
+                    </div>
+                </div>
+                <div class="scrape-copy-result" id="scrapeCopyResult" style="display: none;">
+                    <!-- 结果将由 JavaScript 动态生成 -->
+                </div>
             </div>
         </div>
 
@@ -5506,6 +5899,7 @@
         let scrapeUnscrapedDirs = [];
         let scrapeScrapedDirs = [];
         let allUnscrapedDirs = []; // 用于搜索过滤
+        let scrapeStrmFilePaths = []; // 存储 strm 文件路径信息，格式: [{filePath: 'av/movie1/xxx.strm', dirPath: 'av/movie1'}]
 
         // 默认刮削标识列表
         const DEFAULT_SCRAPE_INDICATORS = [
@@ -5575,7 +5969,8 @@
             try {
                 // 调用 File System Access API 选择文件夹
                 const dirHandle = await window.showDirectoryPicker({
-                    mode: 'read'
+                    mode: 'read',
+                    id: 'strm-scrape-folder'  // 唯一ID，浏览器会记住这个选择器上次打开的位置
                 });
                 
                 // 显示扫描进度
@@ -6019,6 +6414,7 @@
             scrapeMediaDirs = [];
             scrapeUnscrapedDirs = [];
             scrapeScrapedDirs = [];
+            scrapeStrmFilePaths = []; // 清空并重新收集 strm 文件路径
 
             let traverseCount = 0;
 
@@ -6027,17 +6423,16 @@
                 traverseCount++;
                 
                 if (node.type === 'folder' && node.children) {
-                    // 新规则：检查该目录是否为媒体目录（包含 .strm 文件）
-                    const hasStrmFile = node.children.some(child => {
-                        if (child.type === 'file') {
-                            const isStrm = child.name.toLowerCase().endsWith('.strm');
-                            if (isStrm) {
-                                console.log('发现 STRM 文件:', child.name);
-                            }
-                            return isStrm;
+                    // 收集当前目录中的 strm 文件
+                    const strmFiles = [];
+                    for (const child of node.children) {
+                        if (child.type === 'file' && child.name.toLowerCase().endsWith('.strm')) {
+                            console.log('发现 STRM 文件:', child.name);
+                            strmFiles.push(child);
                         }
-                        return false;
-                    });
+                    }
+                    
+                    const hasStrmFile = strmFiles.length > 0;
 
                     if (hasStrmFile) {
                         // 这是一个媒体目录（包含 .strm 文件）
@@ -6057,6 +6452,14 @@
                                 hasNfo: scrapeResult.hasNfo,
                                 hasImage: scrapeResult.hasImage
                             });
+                            
+                            // 收集未刮削目录中的 strm 文件路径
+                            for (const strmFile of strmFiles) {
+                                scrapeStrmFilePaths.push({
+                                    filePath: strmFile.path.join('/'),  // 如 'av/movie1/xxx.strm'
+                                    dirPath: dirPath                     // 所属目录路径
+                                });
+                            }
                         }
                     }
 
@@ -6070,6 +6473,8 @@
             }
 
             traverseAndDetect(scrapeParsedData);
+            
+            console.log('收集到的 STRM 文件路径数量:', scrapeStrmFilePaths.length);
             
             console.log('遍历完成，共遍历节点数:', traverseCount);
             console.log('媒体目录总数:', scrapeMediaDirs.length);
@@ -6166,6 +6571,16 @@
             } else {
                 document.getElementById('unscrapedListCard').style.display = 'none';
                 console.log('没有未刮削目录，隐藏列表卡片');
+            }
+            
+            // 显示/隐藏 STRM 文件复制区域
+            const copySectionEl = document.getElementById('scrapeCopySection');
+            if (copySectionEl) {
+                if (isFileSystemAccessSupported() && unscrapedCount > 0) {
+                    copySectionEl.style.display = 'block';
+                } else {
+                    copySectionEl.style.display = 'none';
+                }
             }
         }
 
@@ -6369,6 +6784,322 @@
                     currentScrapeIndicators = [...DEFAULT_SCRAPE_INDICATORS];
                 }
             }
+        }
+
+        // ==================== STRM 文件复制功能 ====================
+        
+        // 缓存 DirectoryHandle 用于记住上次选择的文件夹
+        let cachedSrcDirHandle = null;
+        let cachedDestDirHandle = null;
+        
+        // 选择源目录
+        async function selectSrcDirectory() {
+            if (!isFileSystemAccessSupported()) {
+                showToast('您的浏览器不支持此功能，请使用 Chrome 或 Edge 浏览器', 'error');
+                return;
+            }
+            
+            try {
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read',
+                    id: 'strm-copy-src'  // 唯一ID，浏览器会记住这个选择器上次打开的位置
+                });
+                
+                cachedSrcDirHandle = dirHandle;
+                
+                // 更新 UI
+                const nameEl = document.getElementById('srcDirName');
+                nameEl.textContent = dirHandle.name;
+                nameEl.classList.add('selected');
+                
+                const btn = document.getElementById('selectSrcDirBtn');
+                btn.classList.add('selected');
+                btn.querySelector('span:last-child').textContent = '更换目录';
+                
+                showToast(`已选择源目录: ${dirHandle.name}`, 'success');
+                
+                // 检查是否可以开始复制
+                updateStartCopyButtonState();
+                
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('选择源目录错误:', err);
+                    showToast('选择目录失败: ' + err.message, 'error');
+                }
+            }
+        }
+        
+        // 选择目标目录
+        async function selectDestDirectory() {
+            if (!isFileSystemAccessSupported()) {
+                showToast('您的浏览器不支持此功能，请使用 Chrome 或 Edge 浏览器', 'error');
+                return;
+            }
+            
+            try {
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'readwrite',
+                    id: 'strm-copy-dest'  // 唯一ID，浏览器会记住这个选择器上次打开的位置
+                });
+                
+                cachedDestDirHandle = dirHandle;
+                
+                // 更新 UI
+                const nameEl = document.getElementById('destDirName');
+                nameEl.textContent = dirHandle.name;
+                nameEl.classList.add('selected');
+                
+                const btn = document.getElementById('selectDestDirBtn');
+                btn.classList.add('selected');
+                btn.querySelector('span:last-child').textContent = '更换目录';
+                
+                showToast(`已选择目标目录: ${dirHandle.name}`, 'success');
+                
+                // 检查是否可以开始复制
+                updateStartCopyButtonState();
+                
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('选择目标目录错误:', err);
+                    showToast('选择目录失败: ' + err.message, 'error');
+                }
+            }
+        }
+        
+        // 更新开始复制按钮状态
+        function updateStartCopyButtonState() {
+            const startBtn = document.getElementById('startCopyBtn');
+            if (cachedSrcDirHandle && cachedDestDirHandle) {
+                startBtn.disabled = false;
+            } else {
+                startBtn.disabled = true;
+            }
+        }
+        
+        // 开始复制 STRM 文件
+        async function startStrmCopy() {
+            if (!cachedSrcDirHandle || !cachedDestDirHandle) {
+                showToast('请先选择源目录和目标目录', 'error');
+                return;
+            }
+            
+            if (scrapeUnscrapedDirs.length === 0) {
+                showToast('没有未刮削目录', 'error');
+                return;
+            }
+            
+            // 验证权限
+            try {
+                const srcPermission = await cachedSrcDirHandle.queryPermission({ mode: 'read' });
+                if (srcPermission !== 'granted') {
+                    const requestResult = await cachedSrcDirHandle.requestPermission({ mode: 'read' });
+                    if (requestResult !== 'granted') {
+                        showToast('需要源目录的读取权限', 'error');
+                        return;
+                    }
+                }
+                
+                const destPermission = await cachedDestDirHandle.queryPermission({ mode: 'readwrite' });
+                if (destPermission !== 'granted') {
+                    const requestResult = await cachedDestDirHandle.requestPermission({ mode: 'readwrite' });
+                    if (requestResult !== 'granted') {
+                        showToast('需要目标目录的写入权限', 'error');
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('权限验证错误:', err);
+                showToast('权限验证失败，请重新选择目录', 'error');
+                // 清除缓存，要求重新选择
+                cachedSrcDirHandle = null;
+                cachedDestDirHandle = null;
+                document.getElementById('srcDirName').textContent = '未选择';
+                document.getElementById('srcDirName').classList.remove('selected');
+                document.getElementById('destDirName').textContent = '未选择';
+                document.getElementById('destDirName').classList.remove('selected');
+                document.getElementById('selectSrcDirBtn').classList.remove('selected');
+                document.getElementById('selectDestDirBtn').classList.remove('selected');
+                document.getElementById('selectSrcDirBtn').querySelector('span:last-child').textContent = '选择目录';
+                document.getElementById('selectDestDirBtn').querySelector('span:last-child').textContent = '选择目录';
+                updateStartCopyButtonState();
+                return;
+            }
+            
+            // 直接使用已解析的 strm 文件路径
+            const strmToCopy = scrapeStrmFilePaths;
+            
+            if (strmToCopy.length === 0) {
+                showToast('没有需要复制的 STRM 文件', 'info');
+                return;
+            }
+            
+            // 显示进度
+            const progressEl = document.getElementById('scrapeCopyProgress');
+            const resultEl = document.getElementById('scrapeCopyResult');
+            const statusText = document.getElementById('scrapeCopyStatusText');
+            const progressFill = document.getElementById('scrapeCopyProgressFill');
+            const copyCountEl = document.getElementById('scrapeCopyCount');
+            const copyTotalEl = document.getElementById('scrapeCopyTotal');
+            const startBtn = document.getElementById('startCopyBtn');
+            
+            progressEl.style.display = 'block';
+            resultEl.style.display = 'none';
+            startBtn.disabled = true;
+            
+            copyTotalEl.textContent = strmToCopy.length;
+            statusText.textContent = '正在复制...';
+            progressFill.style.width = '0%';
+            
+            // 记录成功和失败的文件
+            const successFiles = [];
+            const failedFiles = [];  // {path: '路径', error: '错误信息'}
+            
+            // 复制文件
+            for (const strmInfo of strmToCopy) {
+                try {
+                    // 从源目录按已知路径获取文件
+                    const srcFile = await getFileByPath(cachedSrcDirHandle, strmInfo.filePath);
+                    
+                    // 在目标目录创建同样的路径结构并写入
+                    await copyFileToPath(cachedDestDirHandle, strmInfo.filePath, srcFile);
+                    
+                    successFiles.push(strmInfo.filePath);
+                } catch (err) {
+                    console.error(`复制失败: ${strmInfo.filePath}`, err);
+                    failedFiles.push({
+                        path: strmInfo.filePath,
+                        error: err.message || '未知错误'
+                    });
+                }
+                
+                // 更新进度
+                const processedCount = successFiles.length + failedFiles.length;
+                copyCountEl.textContent = successFiles.length;
+                const progress = (processedCount / strmToCopy.length) * 100;
+                progressFill.style.width = `${progress}%`;
+            }
+            
+            // 隐藏进度，显示结果
+            progressEl.style.display = 'none';
+            startBtn.disabled = false;
+            
+            // 渲染详细结果
+            renderCopyResult(successFiles, failedFiles);
+            
+            if (failedFiles.length > 0) {
+                showToast(`复制完成：成功 ${successFiles.length} 个，失败 ${failedFiles.length} 个`, 'info');
+            } else {
+                showToast(`复制完成：成功复制 ${successFiles.length} 个 STRM 文件`, 'success');
+            }
+        }
+        
+        // 渲染复制结果（包含成功和失败的文件列表）
+        function renderCopyResult(successFiles, failedFiles) {
+            const resultEl = document.getElementById('scrapeCopyResult');
+            resultEl.style.display = 'block';
+            
+            let html = '';
+            
+            // 摘要信息
+            const hasErrors = failedFiles.length > 0;
+            const summaryClass = hasErrors ? 'copy-result-summary has-errors' : 'copy-result-summary';
+            html += `<div class="${summaryClass}">`;
+            if (hasErrors) {
+                html += `✅ 复制完成：成功 ${successFiles.length} 个，失败 ${failedFiles.length} 个`;
+            } else {
+                html += `✅ 复制完成：成功复制 ${successFiles.length} 个文件`;
+            }
+            html += '</div>';
+            
+            // 失败列表（如果有）
+            if (failedFiles.length > 0) {
+                html += '<div class="copy-failed-section" id="copyFailedSection">';
+                html += '<h4>❌ 失败文件：</h4>';
+                html += '<ul class="failed-list">';
+                for (const item of failedFiles) {
+                    html += `<li>${escapeHtml(item.path)} <span class="error-reason">- ${escapeHtml(item.error)}</span></li>`;
+                }
+                html += '</ul>';
+                html += '</div>';
+            }
+            
+            // 成功列表（可折叠）
+            if (successFiles.length > 0) {
+                html += '<details class="copy-success-section">';
+                html += `<summary>✅ 成功文件 (${successFiles.length} 个)</summary>`;
+                html += '<ul class="success-list">';
+                for (const path of successFiles) {
+                    html += `<li>${escapeHtml(path)}</li>`;
+                }
+                html += '</ul>';
+                html += '</details>';
+            }
+            
+            resultEl.innerHTML = html;
+        }
+        
+        // 保留旧函数名以兼容旧代码（如果有其他地方调用）
+        async function copyStrmForScraping() {
+            // 如果已经有缓存的目录，直接开始复制
+            if (cachedSrcDirHandle && cachedDestDirHandle) {
+                await startStrmCopy();
+            } else {
+                showToast('请先选择源目录和目标目录', 'info');
+            }
+        }
+        
+        // 根据相对路径获取文件（不扫描目录，直接按路径定位）
+        async function getFileByPath(rootHandle, relativePath) {
+            const parts = relativePath.split('/').filter(p => p);
+            let currentHandle = rootHandle;
+            
+            // 遍历目录路径
+            for (let i = 0; i < parts.length - 1; i++) {
+                currentHandle = await currentHandle.getDirectoryHandle(parts[i]);
+            }
+            
+            // 获取文件
+            const fileName = parts[parts.length - 1];
+            const fileHandle = await currentHandle.getFileHandle(fileName);
+            return await fileHandle.getFile();
+        }
+        
+        // 复制文件到目标路径（创建必要的目录结构）
+        async function copyFileToPath(destRootHandle, relativePath, srcFile) {
+            const parts = relativePath.split('/').filter(p => p);
+            let currentHandle = destRootHandle;
+            
+            // 创建目录结构
+            for (let i = 0; i < parts.length - 1; i++) {
+                currentHandle = await currentHandle.getDirectoryHandle(parts[i], { create: true });
+            }
+            
+            // 创建文件并写入内容
+            const fileName = parts[parts.length - 1];
+            const content = await srcFile.text();
+            const destFileHandle = await currentHandle.getFileHandle(fileName, { create: true });
+            const writable = await destFileHandle.createWritable();
+            await writable.write(content);
+            await writable.close();
+        }
+        
+        // 创建目录路径（递归创建不存在的目录）
+        async function createDirectoryPath(rootDirHandle, relativePath) {
+            if (!relativePath) return rootDirHandle;
+            
+            const parts = relativePath.split('/').filter(p => p);
+            let currentHandle = rootDirHandle;
+            
+            for (const part of parts) {
+                try {
+                    currentHandle = await currentHandle.getDirectoryHandle(part, { create: true });
+                } catch (err) {
+                    console.error(`创建目录失败: ${part}`, err);
+                    throw err;
+                }
+            }
+            
+            return currentHandle;
         }
     </script>
 </body>
